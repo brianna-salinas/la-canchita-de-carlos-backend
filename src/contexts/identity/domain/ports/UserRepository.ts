@@ -21,4 +21,6 @@ export interface UserRepository {
   updateEmail(userId: number, email: string): Promise<User>;
   updatePasswordHash(userId: number, passwordHash: string): Promise<void>;
   listActiveAdmins(): Promise<Pick<User, "id" | "name" | "email" | "isOwner" | "lastAccess">[]>;
+  listOwnerEmails(): Promise<string[]>;
+  updatePhoto(userId: number, photoUrl: string): Promise<User>;
 }

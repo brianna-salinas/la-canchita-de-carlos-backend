@@ -10,6 +10,7 @@ export interface User {
   status: UserStatus;
   isOwner: boolean;
   lastAccess?: Date | null;
+  photoUrl?: string | null;
 }
 
 // RF20/TS02 — reglas puras de elegibilidad para iniciar sesion.

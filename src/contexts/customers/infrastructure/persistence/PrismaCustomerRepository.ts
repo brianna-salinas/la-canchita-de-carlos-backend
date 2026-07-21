@@ -43,6 +43,10 @@ export class PrismaCustomerRepository implements CustomerRepository {
       court: { id: b.court.id, name: b.court.name },
     }));
   }
+
+  async updatePhoto(customerId: number, photoUrl: string): Promise<Customer> {
+    return prisma.customer.update({ where: { id: customerId }, data: { photoUrl } });
+  }
 }
 
 export const customerRepository: CustomerRepository = new PrismaCustomerRepository();

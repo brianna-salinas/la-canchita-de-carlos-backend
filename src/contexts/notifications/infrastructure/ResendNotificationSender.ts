@@ -65,6 +65,37 @@ export class ResendNotificationSender implements NotificationSender {
        <p><a href="${link}">${link}</a></p>`
     );
   }
+
+  // RF21 — avisa a un owner que hay una solicitud de acceso nueva para revisar.
+  sendNewAccessRequestAlert(params: { to: string; requesterName: string; requesterEmail: string }): Promise<void> {
+    const { to, requesterName, requesterEmail } = params;
+    return this.send(
+      to,
+      "Nueva solicitud de acceso — La Canchita de Carlos",
+      `<p>Hola,</p>
+       <p><strong>${requesterName}</strong> (${requesterEmail}) solicito una cuenta de administrador.</p>
+       <p>Entra al sistema para revisarla y autorizarla o rechazarla.</p>`
+    );
+  }
+
+  // Aviso entre administradores de una reserva nueva registrada por otro admin.
+  sendNewBookingAlert(params: {
+    to: string;
+    registeredByName: string;
+    courtName: string;
+    date: string;
+    startTime: string;
+    endTime: string;
+  }): Promise<void> {
+    const { to, registeredByName, courtName, date, startTime, endTime } = params;
+    return this.send(
+      to,
+      "Nueva reserva registrada — La Canchita de Carlos",
+      `<p>Hola,</p>
+       <p><strong>${registeredByName}</strong> registro un alquiler de <strong>${courtName}</strong>
+       el <strong>${date}</strong> de <strong>${startTime}</strong> a <strong>${endTime}</strong>.</p>`
+    );
+  }
 }
 
 // Instancia unica del adaptador (composicion simple, sin contenedor de DI — coherente

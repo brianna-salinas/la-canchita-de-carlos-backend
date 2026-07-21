@@ -7,12 +7,13 @@ export function makeAddCourtPhoto(deps: { courts: CourtRepository; storage: File
     courtId: number,
     file: { buffer: Buffer; mimetype: string; originalname: string }
   ) {
-    const url = await deps.storage.upload({
+    const result = await deps.storage.upload({
       folder: "canchas",
       buffer: file.buffer,
       mimeType: file.mimetype,
       originalName: file.originalname,
     });
-    return deps.courts.updatePhoto(courtId, url);
+    // Bucket "canchas" es publico: result.url siempre viene con valor aqui.
+    return deps.courts.updatePhoto(courtId, result.url!);
   };
 }

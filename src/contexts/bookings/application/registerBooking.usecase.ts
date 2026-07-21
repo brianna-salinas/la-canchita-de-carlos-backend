@@ -1,6 +1,8 @@
 import type { BookingRepository } from "../domain/ports/BookingRepository.js";
 import type { CourtRepository } from "../domain/ports/CourtRepository.js";
+import type { AdminDirectory } from "../domain/ports/AdminDirectory.js";
 import type { NotificationSender } from "../../notifications/application/ports/NotificationSender.js";
+import type { NotificationRepository } from "../../notifications/domain/ports/NotificationRepository.js";
 import { assertValidRange, hasConflict } from "../domain/model/Booking.js";
 import { HttpError } from "../../../platform/errors/HttpError.js";
 
@@ -15,15 +17,19 @@ export interface RegisterBookingInput {
   startTime: string; // HH:mm
   endTime: string; // HH:mm
   totalAmount: number;
+  actorUserId?: number; // quien registra (para avisar al resto de admins, no al mismo).
 }
 
 // TS01 (+ TS09, creacion de cliente embebida) — caso de uso de Aplicacion: orquesta el
 // dominio (regla RF06 de no-doble-reserva) contra los puertos BookingRepository/CourtRepository,
-// y dispara la notificacion (RF23/RF24) fuera de la transaccion, sin poder revertirla.
+// y dispara las notificaciones (RF23/RF24) fuera de la transaccion, sin poder revertirla:
+// una al cliente (si dejo correo) y otra al resto de admins activos (in-app + correo).
 export function makeRegisterBooking(deps: {
   bookings: BookingRepository;
   courts: CourtRepository;
   notifier: NotificationSender;
+  admins: AdminDirectory;
+  notifications: NotificationRepository;
 }) {
   return async function registerBooking(input: RegisterBookingInput) {
     const date = new Date(input.date);
@@ -65,9 +71,10 @@ export function makeRegisterBooking(deps: {
       });
     });
 
-    // RF23/RF24 — la notificacion corre fuera de la transaccion y nunca revierte el alquiler.
+    // RF23/RF24 — las notificaciones corren fuera de la transaccion y nunca revierten el alquiler.
+    const court = await deps.courts.findByIdOrThrow(input.courtId);
+
     if (input.customerEmail) {
-      const court = await deps.courts.findByIdOrThrow(input.courtId);
       void deps.notifier.sendBookingConfirmation({
         to: input.customerEmail,
         customerName: input.customerName,
@@ -76,6 +83,30 @@ export function makeRegisterBooking(deps: {
         startTime: input.startTime,
         endTime: input.endTime,
       });
+    }
+
+    // Aviso entre administradores: el resto de admins activos se entera (in-app + correo).
+    const otherAdmins = await deps.admins.listOtherActiveAdmins(input.actorUserId);
+    if (otherAdmins.length > 0) {
+      const registeredByName = input.actorUserId ? await deps.admins.findAdminNameOrThrow(input.actorUserId) : "Un administrador";
+      void deps.notifications.createForUsers(
+        otherAdmins.map((a) => a.id),
+        {
+          type: "NEW_BOOKING",
+          title: "Nueva reserva registrada",
+          message: `${registeredByName} registro ${court.name} el ${input.date} de ${input.startTime} a ${input.endTime}.`,
+        }
+      );
+      for (const admin of otherAdmins) {
+        void deps.notifier.sendNewBookingAlert({
+          to: admin.email,
+          registeredByName,
+          courtName: court.name,
+          date: input.date,
+          startTime: input.startTime,
+          endTime: input.endTime,
+        });
+      }
     }
 
     return booking;

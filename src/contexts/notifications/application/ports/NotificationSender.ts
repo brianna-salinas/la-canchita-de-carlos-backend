@@ -14,4 +14,19 @@ export interface NotificationSender {
   sendAdminDecision(params: { to: string; name: string; approved: boolean }): Promise<void>;
 
   sendEmailVerification(params: { to: string; name: string; rawToken: string }): Promise<void>;
+
+  // RF21 — avisa al/los administrador(es) dueno que llego una solicitud de acceso nueva
+  // para revisar, sin que tengan que entrar a chequear manualmente.
+  sendNewAccessRequestAlert(params: { to: string; requesterName: string; requesterEmail: string }): Promise<void>;
+
+  // Aviso entre administradores: cuando uno registra una reserva, el resto de los
+  // admins activos se entera (in-app + correo, a pedido de negocio).
+  sendNewBookingAlert(params: {
+    to: string;
+    registeredByName: string;
+    courtName: string;
+    date: string;
+    startTime: string;
+    endTime: string;
+  }): Promise<void>;
 }

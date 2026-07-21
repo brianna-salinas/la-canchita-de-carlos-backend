@@ -7,12 +7,13 @@ export function makeAttachReceipt(deps: { payments: PaymentRepository; storage: 
     bookingId: number,
     file: { buffer: Buffer; mimetype: string; originalname: string }
   ) {
-    const url = await deps.storage.upload({
+    const result = await deps.storage.upload({
       folder: "comprobantes",
       buffer: file.buffer,
       mimeType: file.mimetype,
       originalName: file.originalname,
     });
-    return deps.payments.attachReceipt(bookingId, url);
+    // Bucket "comprobantes" es privado: guardamos la ruta interna, no una URL publica.
+    return deps.payments.attachReceipt(bookingId, result.path);
   };
 }

@@ -1,7 +1,9 @@
 import { randomUUID } from "crypto";
 import type { BookingRepository } from "../domain/ports/BookingRepository.js";
 import type { CourtRepository } from "../domain/ports/CourtRepository.js";
+import type { AdminDirectory } from "../domain/ports/AdminDirectory.js";
 import type { NotificationSender } from "../../notifications/application/ports/NotificationSender.js";
+import type { NotificationRepository } from "../../notifications/domain/ports/NotificationRepository.js";
 import { assertValidRange, hasConflict } from "../domain/model/Booking.js";
 import { HttpError } from "../../../platform/errors/HttpError.js";
 
@@ -19,6 +21,7 @@ export interface RegisterBookingSeriesInput {
   seriesPaymentMode: "INDIVIDUAL" | "LUMP_SUM";
   seriesLabel?: string;
   bookingType?: "MULTIDAY" | "RECURRING"; // default RECURRING si hay mas de 1 fecha
+  actorUserId?: number; // quien registra (para avisar al resto de admins, no al mismo).
 }
 
 // Reservas multidia/recurrentes (schema: bookingType/seriesId/seriesPaymentMode/etc.,
@@ -35,6 +38,8 @@ export function makeRegisterBookingSeries(deps: {
   bookings: BookingRepository;
   courts: CourtRepository;
   notifier: NotificationSender;
+  admins: AdminDirectory;
+  notifications: NotificationRepository;
 }) {
   return async function registerBookingSeries(input: RegisterBookingSeriesInput) {
     if (!input.dates || input.dates.length === 0) {
@@ -96,16 +101,41 @@ export function makeRegisterBookingSeries(deps: {
     });
 
     // RF23/RF24 — una sola notificacion resumen para toda la serie, fuera de la transaccion.
+    const court = await deps.courts.findByIdOrThrow(input.courtId);
+    const dateLabel = `${input.dates[0]} (+${total - 1} fecha(s) mas)`;
+
     if (input.customerEmail) {
-      const court = await deps.courts.findByIdOrThrow(input.courtId);
       void deps.notifier.sendBookingConfirmation({
         to: input.customerEmail,
         customerName: input.customerName,
         courtName: court.name,
-        date: `${input.dates[0]} (+${total - 1} fecha(s) mas)`,
+        date: dateLabel,
         startTime: input.startTime,
         endTime: input.endTime,
       });
+    }
+
+    const otherAdmins = await deps.admins.listOtherActiveAdmins(input.actorUserId);
+    if (otherAdmins.length > 0) {
+      const registeredByName = input.actorUserId ? await deps.admins.findAdminNameOrThrow(input.actorUserId) : "Un administrador";
+      void deps.notifications.createForUsers(
+        otherAdmins.map((a) => a.id),
+        {
+          type: "NEW_BOOKING",
+          title: "Nueva serie de reservas registrada",
+          message: `${registeredByName} registro una serie de ${total} fecha(s) en ${court.name}, desde ${dateLabel}.`,
+        }
+      );
+      for (const admin of otherAdmins) {
+        void deps.notifier.sendNewBookingAlert({
+          to: admin.email,
+          registeredByName,
+          courtName: court.name,
+          date: dateLabel,
+          startTime: input.startTime,
+          endTime: input.endTime,
+        });
+      }
     }
 
     return bookings;

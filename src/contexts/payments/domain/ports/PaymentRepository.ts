@@ -17,5 +17,8 @@ export interface PaymentRepository {
   ): Promise<{ booking: PayableBooking; payment: Payment }>;
 
   listPaymentsForBooking(bookingId: number): Promise<Payment[]>;
-  attachReceipt(bookingId: number, receiptUrl: string): Promise<PayableBooking>;
+  // receiptPath: desde el bucket privado, guardamos la ruta interna (no una URL publica).
+  attachReceipt(bookingId: number, receiptPath: string): Promise<PayableBooking>;
+  // Recupera la ruta guardada para poder generar una signed URL bajo demanda (TS08).
+  getReceiptPath(bookingId: number): Promise<string | null>;
 }

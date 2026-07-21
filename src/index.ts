@@ -9,6 +9,7 @@ import { courtsRouter } from "./contexts/bookings/interfaces/rest/courts.routes.
 import { customersRouter } from "./contexts/customers/interfaces/rest/customers.routes.js";
 import { paymentsRouter } from "./contexts/payments/interfaces/rest/payments.routes.js";
 import { panelRouter } from "./contexts/panel/interfaces/rest/panel.routes.js";
+import { notificationsRouter } from "./contexts/notifications/interfaces/rest/notifications.routes.js";
 import { errorMiddleware } from "./platform/middlewares/error.middleware.js";
 
 const app = express();
@@ -27,6 +28,7 @@ app.use("/customers", customersRouter);
 app.use("/payments", paymentsRouter);
 app.use("/panel", panelRouter);
 app.use("/users", usersRouter);
+app.use("/notifications", notificationsRouter);
 
 app.use(errorMiddleware);
 

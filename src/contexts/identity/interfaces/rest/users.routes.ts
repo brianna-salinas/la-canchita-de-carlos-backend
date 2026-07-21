@@ -1,10 +1,12 @@
 import { Router } from "express";
+import multer from "multer";
 import { requireAuth } from "../../../../platform/middlewares/auth.middleware.js";
 import { requireOwner } from "../../../../platform/middlewares/ownerOnly.middleware.js";
 import { userRepository } from "../../infrastructure/persistence/PrismaUserRepository.js";
 import { accessRequestRepository } from "../../infrastructure/persistence/PrismaAccessRequestRepository.js";
 import { emailVerificationTokenRepository } from "../../infrastructure/persistence/PrismaEmailVerificationTokenRepository.js";
 import { notificationSender } from "../../../notifications/infrastructure/ResendNotificationSender.js";
+import { SupabaseFileStorage } from "../../../../platform/storage/SupabaseFileStorage.js";
 import { makeRequestAdminRegistration } from "../../application/requestAdminRegistration.usecase.js";
 import { makeAuthorizeAdminRequest } from "../../application/authorizeAdminRequest.usecase.js";
 import { makeRejectAdminRequest } from "../../application/rejectAdminRequest.usecase.js";
@@ -14,9 +16,18 @@ import { makeListActiveAdmins } from "../../application/listActiveAdmins.usecase
 import { makeUpdateOwnEmail } from "../../application/updateOwnEmail.usecase.js";
 import { makeChangeOwnPassword } from "../../application/changeOwnPassword.usecase.js";
 import { makePromoteToOwner } from "../../application/promoteToOwner.usecase.js";
+import { makeUploadUserPhoto } from "../../application/uploadUserPhoto.usecase.js";
 import { sessionRepository } from "../../infrastructure/persistence/PrismaSessionRepository.js";
+import { HttpError } from "../../../../platform/errors/HttpError.js";
 
-const requestAdminRegistration = makeRequestAdminRegistration({ users: userRepository, accessRequests: accessRequestRepository });
+const upload = multer({ storage: multer.memoryStorage() });
+const storage = new SupabaseFileStorage();
+
+const requestAdminRegistration = makeRequestAdminRegistration({
+  users: userRepository,
+  accessRequests: accessRequestRepository,
+  notifier: notificationSender,
+});
 const authorizeAdminRequest = makeAuthorizeAdminRequest({
   users: userRepository,
   accessRequests: accessRequestRepository,
@@ -30,6 +41,7 @@ const listActiveAdmins = makeListActiveAdmins({ users: userRepository });
 const updateOwnEmail = makeUpdateOwnEmail({ users: userRepository });
 const changeOwnPassword = makeChangeOwnPassword({ users: userRepository, sessions: sessionRepository });
 const promoteToOwner = makePromoteToOwner({ users: userRepository });
+const uploadUserPhoto = makeUploadUserPhoto({ users: userRepository, storage });
 
 export const usersRouter = Router();
 
@@ -121,6 +133,24 @@ usersRouter.patch("/me/contrasena", async (req, res, next) => {
   try {
     const result = await changeOwnPassword(req.user!.userId, req.body.currentPassword, req.body.newPassword);
     res.status(200).json(result);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// TS10 (analogo) — POST /users/:id/foto (foto de perfil, carpeta publica "perfiles").
+// Solo el propio usuario o un dueno puede cambiar la foto de una cuenta.
+usersRouter.post("/:id/foto", upload.single("foto"), async (req, res, next) => {
+  try {
+    const targetId = Number(req.params.id);
+    if (targetId !== req.user!.userId && !req.user!.isOwner) {
+      throw new HttpError(403, "Solo puedes cambiar tu propia foto de perfil.");
+    }
+    if (!req.file) {
+      return res.status(400).json({ error: "No se envio ninguna imagen." });
+    }
+    const user = await uploadUserPhoto(targetId, req.file);
+    res.status(200).json(user);
   } catch (err) {
     next(err);
   }

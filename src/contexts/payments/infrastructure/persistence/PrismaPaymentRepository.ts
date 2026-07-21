@@ -36,9 +36,14 @@ export class PrismaPaymentRepository implements PaymentRepository {
     return payments.map(toPayment);
   }
 
-  async attachReceipt(bookingId: number, receiptUrl: string): Promise<PayableBooking> {
-    const updated = await prisma.booking.update({ where: { id: bookingId }, data: { receiptUrl } });
+  async attachReceipt(bookingId: number, receiptPath: string): Promise<PayableBooking> {
+    const updated = await prisma.booking.update({ where: { id: bookingId }, data: { receiptUrl: receiptPath } });
     return toPayableBooking(updated);
+  }
+
+  async getReceiptPath(bookingId: number): Promise<string | null> {
+    const booking = await prisma.booking.findUniqueOrThrow({ where: { id: bookingId }, select: { receiptUrl: true } });
+    return booking.receiptUrl;
   }
 }
 

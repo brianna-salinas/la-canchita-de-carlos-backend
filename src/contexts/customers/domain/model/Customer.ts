@@ -7,4 +7,5 @@ export interface Customer {
   phone: string;
   documentNumber?: string | null;
   status: CustomerStatus;
+  photoUrl?: string | null;
 }

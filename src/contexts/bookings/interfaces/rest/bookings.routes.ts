@@ -3,6 +3,8 @@ import { requireAuth } from "../../../../platform/middlewares/auth.middleware.js
 import { bookingRepository } from "../../infrastructure/persistence/PrismaBookingRepository.js";
 import { courtRepository } from "../../infrastructure/persistence/PrismaCourtRepository.js";
 import { notificationSender } from "../../../notifications/infrastructure/ResendNotificationSender.js";
+import { notificationRepository } from "../../../notifications/infrastructure/persistence/PrismaNotificationRepository.js";
+import { adminDirectory } from "../../infrastructure/persistence/PrismaAdminDirectory.js";
 import { makeRegisterBooking } from "../../application/registerBooking.usecase.js";
 import { makeEditBooking } from "../../application/editBooking.usecase.js";
 import { makeCancelBooking } from "../../application/cancelBooking.usecase.js";
@@ -11,11 +13,23 @@ import { makeRegisterBookingSeries } from "../../application/registerBookingSeri
 import type { BookingStatus } from "../../domain/model/Booking.js";
 
 // Adaptador de entrada (anillo "Interfaces/REST"): traduce HTTP <-> casos de uso de Aplicacion.
-const registerBooking = makeRegisterBooking({ bookings: bookingRepository, courts: courtRepository, notifier: notificationSender });
+const registerBooking = makeRegisterBooking({
+  bookings: bookingRepository,
+  courts: courtRepository,
+  notifier: notificationSender,
+  admins: adminDirectory,
+  notifications: notificationRepository,
+});
 const editBooking = makeEditBooking({ bookings: bookingRepository });
 const cancelBooking = makeCancelBooking({ bookings: bookingRepository });
 const searchBookings = makeSearchBookings({ bookings: bookingRepository });
-const registerBookingSeries = makeRegisterBookingSeries({ bookings: bookingRepository, courts: courtRepository, notifier: notificationSender });
+const registerBookingSeries = makeRegisterBookingSeries({
+  bookings: bookingRepository,
+  courts: courtRepository,
+  notifier: notificationSender,
+  admins: adminDirectory,
+  notifications: notificationRepository,
+});
 
 export const bookingsRouter = Router();
 bookingsRouter.use(requireAuth);
@@ -23,7 +37,7 @@ bookingsRouter.use(requireAuth);
 // TS01 (+ TS09) — POST /bookings
 bookingsRouter.post("/", async (req, res, next) => {
   try {
-    const booking = await registerBooking(req.body);
+    const booking = await registerBooking({ ...req.body, actorUserId: req.user!.userId });
     res.status(201).json(booking);
   } catch (err) {
     next(err);
@@ -33,7 +47,7 @@ bookingsRouter.post("/", async (req, res, next) => {
 // Reservas multidia/recurrentes — POST /bookings/serie
 bookingsRouter.post("/serie", async (req, res, next) => {
   try {
-    const bookings = await registerBookingSeries(req.body);
+    const bookings = await registerBookingSeries({ ...req.body, actorUserId: req.user!.userId });
     res.status(201).json(bookings);
   } catch (err) {
     next(err);

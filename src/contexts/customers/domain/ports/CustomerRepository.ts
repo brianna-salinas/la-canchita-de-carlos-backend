@@ -22,4 +22,5 @@ export interface CustomerRepository {
   deactivate(customerId: number): Promise<Customer>;
   list(search?: string): Promise<Customer[]>;
   getBookingHistory(customerId: number): Promise<CustomerHistoryEntry[]>;
+  updatePhoto(customerId: number, photoUrl: string): Promise<Customer>;
 }

@@ -51,6 +51,18 @@ export class PrismaUserRepository implements UserRepository {
       orderBy: { name: "asc" },
     });
   }
+
+  async listOwnerEmails(): Promise<string[]> {
+    const owners = await prisma.user.findMany({
+      where: { isOwner: true, status: "ACTIVE" },
+      select: { email: true },
+    });
+    return owners.map((o) => o.email);
+  }
+
+  async updatePhoto(userId: number, photoUrl: string): Promise<User> {
+    return prisma.user.update({ where: { id: userId }, data: { photoUrl } });
+  }
 }
 
 export const userRepository: UserRepository = new PrismaUserRepository();
