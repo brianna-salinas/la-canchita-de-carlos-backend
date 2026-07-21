@@ -1,14 +1,16 @@
 import type { PaymentRepository } from "../domain/ports/PaymentRepository.js";
+import type { PaymentMethod } from "../domain/model/Payment.js";
 import { assertAmountWithinTotal, resolveStatus } from "../domain/model/Payment.js";
 import { HttpError } from "../../../platform/errors/HttpError.js";
 
 export interface RegisterPaymentInput {
   bookingId: number;
   amount: number;
-  method: string;
+  method: PaymentMethod;
 }
 
-// TS03 — registra un pago (total o parcial), recalculando el saldo del Booking (US14/US15).
+// TS03 — registra un pago (total o parcial), persistiendo el metodo (RF16/US16) y
+// recalculando el saldo del Booking (US14/US15) en una sola transaccion atomica.
 export function makeRegisterPayment(deps: { payments: PaymentRepository }) {
   return async function registerPayment(input: RegisterPaymentInput) {
     const booking = await deps.payments.findBookingOrThrow(input.bookingId);
@@ -21,8 +23,7 @@ export function makeRegisterPayment(deps: { payments: PaymentRepository }) {
 
     const newPaidAmount = booking.paidAmount + input.amount;
     const status = resolveStatus(booking, newPaidAmount);
-    const updated = await deps.payments.applyPayment(input.bookingId, newPaidAmount, status);
 
-    return { booking: updated, method: input.method, amountRegistered: input.amount };
+    return deps.payments.registerPaymentAtomic(input.bookingId, input.amount, input.method, newPaidAmount, status);
   };
 }

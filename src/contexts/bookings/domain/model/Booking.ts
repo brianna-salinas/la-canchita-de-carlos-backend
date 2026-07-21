@@ -4,6 +4,9 @@
 export type BookingStatus = "BOOKED" | "CANCELLED" | "COMPLETED";
 export type PaymentStatus = "PENDING" | "PARTIAL" | "PAID";
 
+export type BookingSeriesType = "SINGLE" | "MULTIDAY" | "RECURRING";
+export type SeriesPaymentMode = "INDIVIDUAL" | "LUMP_SUM";
+
 export interface Booking {
   id: number;
   courtId: number;
@@ -18,6 +21,12 @@ export interface Booking {
   paidAmount: number;
   paymentStatus: PaymentStatus;
   receiptUrl?: string | null;
+  bookingType?: BookingSeriesType;
+  seriesId?: string | null;
+  seriesPaymentMode?: SeriesPaymentMode | null;
+  seriesLabel?: string | null;
+  seriesTotalDates?: number | null;
+  seriesIndex?: number | null;
 }
 
 export interface TimeRange {

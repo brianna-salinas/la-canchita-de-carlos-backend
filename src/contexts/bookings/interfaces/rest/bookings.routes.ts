@@ -7,6 +7,7 @@ import { makeRegisterBooking } from "../../application/registerBooking.usecase.j
 import { makeEditBooking } from "../../application/editBooking.usecase.js";
 import { makeCancelBooking } from "../../application/cancelBooking.usecase.js";
 import { makeSearchBookings } from "../../application/searchBookings.usecase.js";
+import { makeRegisterBookingSeries } from "../../application/registerBookingSeries.usecase.js";
 import type { BookingStatus } from "../../domain/model/Booking.js";
 
 // Adaptador de entrada (anillo "Interfaces/REST"): traduce HTTP <-> casos de uso de Aplicacion.
@@ -14,6 +15,7 @@ const registerBooking = makeRegisterBooking({ bookings: bookingRepository, court
 const editBooking = makeEditBooking({ bookings: bookingRepository });
 const cancelBooking = makeCancelBooking({ bookings: bookingRepository });
 const searchBookings = makeSearchBookings({ bookings: bookingRepository });
+const registerBookingSeries = makeRegisterBookingSeries({ bookings: bookingRepository, courts: courtRepository, notifier: notificationSender });
 
 export const bookingsRouter = Router();
 bookingsRouter.use(requireAuth);
@@ -23,6 +25,16 @@ bookingsRouter.post("/", async (req, res, next) => {
   try {
     const booking = await registerBooking(req.body);
     res.status(201).json(booking);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Reservas multidia/recurrentes — POST /bookings/serie
+bookingsRouter.post("/serie", async (req, res, next) => {
+  try {
+    const bookings = await registerBookingSeries(req.body);
+    res.status(201).json(bookings);
   } catch (err) {
     next(err);
   }

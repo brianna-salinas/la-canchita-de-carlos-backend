@@ -9,6 +9,14 @@ export interface NewBookingData {
   startTime: Date;
   endTime: Date;
   totalAmount: number;
+  // Reservas multidia/recurrentes (US28/frontend): opcionales, solo se completan cuando
+  // el Booking pertenece a una serie generada por registerBookingSeries.usecase.ts.
+  bookingType?: "SINGLE" | "MULTIDAY" | "RECURRING";
+  seriesId?: string;
+  seriesPaymentMode?: "INDIVIDUAL" | "LUMP_SUM";
+  seriesLabel?: string;
+  seriesTotalDates?: number;
+  seriesIndex?: number;
 }
 
 export interface SearchFilters {

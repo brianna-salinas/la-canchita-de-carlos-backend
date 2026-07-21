@@ -207,6 +207,18 @@ model Customer {
   @@map("customers")
 }
 
+model Payment {
+  id        Int      @id @default(autoincrement()) @map("pay_id")
+  bookingId Int      @map("pay_booking_id")
+  amount    Decimal  @map("pay_amount") @db.Decimal(10, 2)
+  method    String   @map("pay_method") @db.VarChar(30)
+  createdAt DateTime @default(now()) @map("pay_created_at") @db.Timestamptz()
+
+  booking Booking @relation(fields: [bookingId], references: [id])
+
+  @@map("payments")
+}
+
 model Booking {
   id                Int                @id @default(autoincrement()) @map("boo_id")
   courtId           Int                @map("boo_court_id")
@@ -232,6 +244,7 @@ model Booking {
 
   court    Court     @relation(fields: [courtId], references: [id])
   customer Customer? @relation(fields: [customerId], references: [id])
+  payments Payment[]
 
   @@map("bookings")
 }
