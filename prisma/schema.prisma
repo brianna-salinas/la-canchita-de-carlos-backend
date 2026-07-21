@@ -1,7 +1,4 @@
-// ============================================================
-// La Canchita de Carlos — Prisma Schema (Sprint 2 backend)
-// Generado a partir de schema.sql
-// ============================================================
+// Prisma schema — La Canchita de Carlos backend
 
 generator client {
   provider = "prisma-client"
@@ -12,11 +9,10 @@ datasource db {
   provider = "postgresql"
 }
 
-// ---------- Enums ----------
-
 enum UserStatus {
   ACTIVE
   INACTIVE
+  PENDING_VERIFICATION
 
   @@map("user_status_enum")
 }
@@ -85,9 +81,6 @@ enum NotificationType {
   @@map("notification_type_enum")
 }
 
-// ============================================================
-// USERS (usu) — system administrators (Carlos + su trabajador)
-// ============================================================
 model User {
   id           Int        @id @default(autoincrement()) @map("usu_id")
   name         String     @map("usu_name") @db.VarChar(150)
@@ -99,19 +92,17 @@ model User {
   photoUrl     String?    @map("usu_photo_url")
   lastAccess   DateTime?  @map("usu_last_access") @db.Timestamptz()
   createdAt    DateTime   @default(now()) @map("usu_created_at") @db.Timestamptz()
-  updatedAt    DateTime   @updatedAt @map("usu_updated_at") @db.Timestamptz()
+  updatedAt    DateTime   @default(now()) @updatedAt @map("usu_updated_at") @db.Timestamptz()
 
-  sessions            Session[]
-  passwordResetTokens PasswordResetToken[]
-  accessRequests      AccessRequest[]
-  notifications       Notification[]
+  sessions                Session[]
+  passwordResetTokens     PasswordResetToken[]
+  emailVerificationTokens EmailVerificationToken[]
+  accessRequestsCreated   AccessRequest[]
+  notifications           Notification[]
 
   @@map("users")
 }
 
-// ============================================================
-// SESSIONS (ses) — historial de login / control de sesión activa
-// ============================================================
 model Session {
   id        Int      @id @default(autoincrement()) @map("ses_id")
   userId    Int      @map("ses_user_id")
@@ -122,15 +113,11 @@ model Session {
   expiresAt DateTime @map("ses_expires_at") @db.Timestamptz()
   revoked   Boolean  @default(false) @map("ses_revoked")
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id])
 
-  @@index([userId], map: "ix_sessions_user")
   @@map("sessions")
 }
 
-// ============================================================
-// PASSWORD_RESET_TOKENS (prt) — flujo de "Olvidé mi contraseña"
-// ============================================================
 model PasswordResetToken {
   id        Int      @id @default(autoincrement()) @map("prt_id")
   userId    Int      @map("prt_user_id")
@@ -139,15 +126,24 @@ model PasswordResetToken {
   used      Boolean  @default(false) @map("prt_used")
   createdAt DateTime @default(now()) @map("prt_created_at") @db.Timestamptz()
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id])
 
-  @@index([userId], map: "ix_password_reset_tokens_user")
   @@map("password_reset_tokens")
 }
 
-// ============================================================
-// ACCESS_REQUESTS (req) — solicitudes de cuenta pendientes
-// ============================================================
+model EmailVerificationToken {
+  id        Int      @id @default(autoincrement()) @map("evt_id")
+  userId    Int      @map("evt_user_id")
+  tokenHash String   @unique @map("evt_token_hash") @db.VarChar(255)
+  expiresAt DateTime @map("evt_expires_at") @db.Timestamptz()
+  used      Boolean  @default(false) @map("evt_used")
+  createdAt DateTime @default(now()) @map("evt_created_at") @db.Timestamptz()
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("email_verification_tokens")
+}
+
 model AccessRequest {
   id            Int           @id @default(autoincrement()) @map("req_id")
   name          String        @map("req_name") @db.VarChar(150)
@@ -159,14 +155,11 @@ model AccessRequest {
   createdAt     DateTime      @default(now()) @map("req_created_at") @db.Timestamptz()
   resolvedAt    DateTime?     @map("req_resolved_at") @db.Timestamptz()
 
-  createdUser User? @relation(fields: [createdUserId], references: [id], onDelete: SetNull)
+  createdUser User? @relation(fields: [createdUserId], references: [id])
 
   @@map("access_requests")
 }
 
-// ============================================================
-// COURTS (cou)
-// ============================================================
 model Court {
   id           Int         @id @default(autoincrement()) @map("cou_id")
   name         String      @map("cou_name") @db.VarChar(100)
@@ -178,7 +171,7 @@ model Court {
   photoUrl     String?     @map("cou_photo_url")
   description  String?     @map("cou_description")
   createdAt    DateTime    @default(now()) @map("cou_created_at") @db.Timestamptz()
-  updatedAt    DateTime    @updatedAt @map("cou_updated_at") @db.Timestamptz()
+  updatedAt    DateTime    @default(now()) @updatedAt @map("cou_updated_at") @db.Timestamptz()
 
   scheduleBlocks ScheduleBlock[]
   bookings       Booking[]
@@ -186,9 +179,6 @@ model Court {
   @@map("courts")
 }
 
-// ============================================================
-// SCHEDULE_BLOCKS (blo) — bloqueos manuales de mantenimiento
-// ============================================================
 model ScheduleBlock {
   id        Int      @id @default(autoincrement()) @map("blo_id")
   courtId   Int      @map("blo_court_id")
@@ -197,15 +187,11 @@ model ScheduleBlock {
   reason    String?  @map("blo_reason") @db.VarChar(200)
   createdAt DateTime @default(now()) @map("blo_created_at") @db.Timestamptz()
 
-  court Court @relation(fields: [courtId], references: [id], onDelete: Cascade)
+  court Court @relation(fields: [courtId], references: [id])
 
-  @@index([courtId, date], map: "ix_schedule_blocks_court_date")
   @@map("schedule_blocks")
 }
 
-// ============================================================
-// CUSTOMERS (cus)
-// ============================================================
 model Customer {
   id             Int            @id @default(autoincrement()) @map("cus_id")
   name           String         @map("cus_name") @db.VarChar(150)
@@ -214,66 +200,44 @@ model Customer {
   status         CustomerStatus @default(ACTIVE) @map("cus_status")
   photoUrl       String?        @map("cus_photo_url")
   createdAt      DateTime       @default(now()) @map("cus_created_at") @db.Timestamptz()
-  updatedAt      DateTime       @updatedAt @map("cus_updated_at") @db.Timestamptz()
+  updatedAt      DateTime       @default(now()) @updatedAt @map("cus_updated_at") @db.Timestamptz()
 
   bookings Booking[]
 
   @@map("customers")
 }
 
-// ============================================================
-// BOOKINGS (boo) — incluye soporte para series multidía/recurrentes
-// ============================================================
 model Booking {
-  id      Int @id @default(autoincrement()) @map("boo_id")
-  courtId Int @map("boo_court_id")
-
-  // Nullable: reservas walk-in/grupales sin cliente registrado
-  // (ej. "Club Atlético Juniors") guardan el nombre directo en
-  // customerName y dejan customerId NULL. Único campo
-  // deliberadamente desnormalizado del esquema (ver 6.1 del documento).
-  customerId   Int?   @map("boo_customer_id")
-  customerName String @map("boo_customer_name") @db.VarChar(150)
-
-  type          String?       @map("boo_type") @db.VarChar(80)
-  date          DateTime      @map("boo_date") @db.Date
-  startTime     DateTime      @map("boo_start_time") @db.Time()
-  endTime       DateTime      @map("boo_end_time") @db.Time()
-  status        BookingStatus @default(BOOKED) @map("boo_status")
-  paymentStatus PaymentStatus @default(PENDING) @map("boo_payment_status")
-  totalAmount   Decimal       @default(0) @map("boo_total_amount") @db.Decimal(10, 2)
-  paidAmount    Decimal       @default(0) @map("boo_paid_amount") @db.Decimal(10, 2)
-
-  // --- Campos de serie (reservas MULTIDAY / RECURRING) ---
+  id                Int                @id @default(autoincrement()) @map("boo_id")
+  courtId           Int                @map("boo_court_id")
+  customerId        Int?               @map("boo_customer_id")
+  customerName      String             @map("boo_customer_name") @db.VarChar(150)
+  type              String?            @map("boo_type") @db.VarChar(80)
+  date              DateTime           @map("boo_date") @db.Date
+  startTime         DateTime           @map("boo_start_time") @db.Time()
+  endTime           DateTime           @map("boo_end_time") @db.Time()
+  status            BookingStatus      @default(BOOKED) @map("boo_status")
+  paymentStatus     PaymentStatus      @default(PENDING) @map("boo_payment_status")
+  totalAmount       Decimal            @default(0) @map("boo_total_amount") @db.Decimal(10, 2)
+  paidAmount        Decimal            @default(0) @map("boo_paid_amount") @db.Decimal(10, 2)
   bookingType       BookingType        @default(SINGLE) @map("boo_booking_type")
   seriesId          String?            @map("boo_series_id") @db.Uuid
   seriesPaymentMode SeriesPaymentMode? @map("boo_series_payment_mode")
   seriesLabel       String?            @map("boo_series_label") @db.VarChar(200)
   seriesTotalDates  Int?               @map("boo_series_total_dates")
   seriesIndex       Int?               @map("boo_series_index")
+  receiptUrl        String?            @map("boo_receipt_url")
+  createdAt         DateTime           @default(now()) @map("boo_created_at") @db.Timestamptz()
+  updatedAt         DateTime           @default(now()) @updatedAt @map("boo_updated_at") @db.Timestamptz()
 
-  receiptUrl String? @map("boo_receipt_url")
+  court    Court     @relation(fields: [courtId], references: [id])
+  customer Customer? @relation(fields: [customerId], references: [id])
 
-  createdAt DateTime @default(now()) @map("boo_created_at") @db.Timestamptz()
-  updatedAt DateTime @updatedAt @map("boo_updated_at") @db.Timestamptz()
-
-  court    Court     @relation(fields: [courtId], references: [id], onDelete: Restrict)
-  customer Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
-
-  @@index([date], map: "ix_bookings_date")
-  @@index([courtId, date], map: "ix_bookings_court_date")
-  @@index([customerId], map: "ix_bookings_customer")
-  @@index([seriesId], map: "ix_bookings_series")
-  @@index([paymentStatus], map: "ix_bookings_payment_status")
   @@map("bookings")
 }
 
-// ============================================================
-// NOTIFICATIONS (ntf) — panel de campanita del AppShell
-// ============================================================
 model Notification {
   id        Int              @id @default(autoincrement()) @map("ntf_id")
-  // NULL = visible para todo usuario con acceso (aviso general).
   userId    Int?             @map("ntf_user_id")
   type      NotificationType @default(GENERAL) @map("ntf_type")
   title     String           @map("ntf_title") @db.VarChar(150)
@@ -282,9 +246,7 @@ model Notification {
   read      Boolean          @default(false) @map("ntf_read")
   createdAt DateTime         @default(now()) @map("ntf_created_at") @db.Timestamptz()
 
-  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User? @relation(fields: [userId], references: [id])
 
-  @@index([userId, read], map: "ix_notifications_user_read")
-  @@index([createdAt], map: "ix_notifications_created_at")
   @@map("notifications")
 }
