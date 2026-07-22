@@ -1,0 +1,17 @@
+{
+  "default": {
+    "import": [
+      "features/support/*.ts",
+      "features/step-definitions/*.ts"
+    ],
+    "requireModule": [],
+    "paths": [
+      "features/bookings.feature",
+      "features/payments.feature",
+      "features/access_requests.feature",
+      "features/maintenance_blocks.feature",
+      "features/notifications.feature"
+    ],
+    "format": ["progress-bar"]
+  }
+}

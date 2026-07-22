@@ -25,6 +25,6 @@ export function assertAmountWithinTotal(booking: PayableBooking, amountToAdd: nu
   }
 }
 
-export function resolveStatus(booking: PayableBooking, newPaidAmount: number): PaymentStatus {
+export function resolveStatus(booking: PayableBooking, newPaidAmount: number): "PAID" | "PARTIAL" {
   return newPaidAmount >= booking.totalAmount ? "PAID" : "PARTIAL";
 }

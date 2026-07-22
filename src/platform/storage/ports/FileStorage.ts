@@ -1,9 +1,4 @@
-// Puerto para subir archivos binarios. Un solo bucket de Supabase Storage, con seguridad
-// aplicada por CARPETA (no por bucket): "canchas", "perfiles" y "clientes" son de lectura
-// publica (policies RLS de storage.objects lo permiten); "comprobantes" es privado, solo
-// accesible generando una URL firmada de vida corta (TS08). El adaptador concreto
-// (SupabaseFileStorage.ts) implementa esto contra Supabase Storage; podria reemplazarse
-// por S3 sin tocar casos de uso.
+
 export type UploadFolder = "canchas" | "perfiles" | "clientes" | "comprobantes";
 
 export interface UploadFileInput {

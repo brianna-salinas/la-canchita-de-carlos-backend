@@ -19,8 +19,6 @@ export interface NotificationSender {
   // para revisar, sin que tengan que entrar a chequear manualmente.
   sendNewAccessRequestAlert(params: { to: string; requesterName: string; requesterEmail: string }): Promise<void>;
 
-  // Aviso entre administradores: cuando uno registra una reserva, el resto de los
-  // admins activos se entera (in-app + correo, a pedido de negocio).
   sendNewBookingAlert(params: {
     to: string;
     registeredByName: string;

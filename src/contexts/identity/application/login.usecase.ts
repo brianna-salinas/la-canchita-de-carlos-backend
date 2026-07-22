@@ -16,7 +16,8 @@ export interface LoginInput {
 // TS02 — login por username o correo. Emite SessionStarted (US01).
 export function makeLogin(deps: { users: UserRepository; sessions: SessionRepository }) {
   return async function login(input: LoginInput) {
-    const user = await deps.users.findByUsernameOrEmail(input.usernameOrEmail);
+    const usernameOrEmail = input.usernameOrEmail.trim();
+    const user = await deps.users.findByUsernameOrEmail(usernameOrEmail);
     if (!user) {
       throw new HttpError(401, "Usuario o contrasena incorrectos.");
     }

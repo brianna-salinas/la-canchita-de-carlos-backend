@@ -33,12 +33,8 @@ export type BookingWithRelations = Booking & {
   customer?: { id: number; name: string; phone: string } | null;
 };
 
-// Puerto (interfaz) que la capa de Aplicacion necesita para el aggregate Booking.
-// La implementacion concreta (adaptador de salida) vive en infrastructure/persistence
-// y hoy usa Prisma/PostgreSQL; podria reemplazarse por otro ORM sin tocar los casos de uso.
+
 export interface BookingRepository {
-  // Ejecuta `fn` dentro de una transaccion, pasandole un repositorio "transaccional"
-  // para que la verificacion de disponibilidad (RF06) y la escritura sean atomicas.
   runTransaction<T>(fn: (tx: BookingRepository) => Promise<T>): Promise<T>;
 
   findActiveOverlapCandidates(courtId: number, date: Date): Promise<(TimeRange & { id: number })[]>;

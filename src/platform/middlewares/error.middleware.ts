@@ -12,7 +12,7 @@ export function errorMiddleware(err: unknown, _req: Request, res: Response, _nex
   // Errores de subida de archivos (multer): campo de form-data incorrecto, archivo muy
   // grande, etc. Sin esto caian al 500 generico y no se entendia la causa real.
   if (err instanceof MulterError) {
-    if (err.code === "LIMIT_UNEXPECTED_FIELD") {
+    if (err.code === "LIMIT_UNEXPECTED_FILE") {
       return res
         .status(400)
         .json({ error: `El campo del archivo enviado ("${err.field}") no coincide con el que espera este endpoint.` });

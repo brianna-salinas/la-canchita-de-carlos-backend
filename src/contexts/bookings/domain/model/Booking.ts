@@ -1,6 +1,3 @@
-// Entidad de dominio pura (anillo "Dominio" de 4.0): sin dependencias de Express,
-// Prisma ni ninguna libreria externa. Representa el aggregate Booking del bounded
-// context Bookings (nucleo).
 export type BookingStatus = "BOOKED" | "CANCELLED" | "COMPLETED";
 export type PaymentStatus = "PENDING" | "PARTIAL" | "PAID";
 

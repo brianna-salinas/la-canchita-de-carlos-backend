@@ -1,7 +1,7 @@
 import type { UserRepository } from "../domain/ports/UserRepository.js";
 import type { FileStorage } from "../../../platform/storage/ports/FileStorage.js";
 
-// TS10 (analogo) — foto de perfil de un admin/dueno. Carpeta publica "perfiles".
+// TS10 — foto de perfil de un admin/dueno. Carpeta publica "perfiles".
 export function makeUploadUserPhoto(deps: { users: UserRepository; storage: FileStorage }) {
   return async function uploadUserPhoto(
     userId: number,

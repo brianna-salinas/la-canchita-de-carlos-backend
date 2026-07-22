@@ -1,0 +1,36 @@
+@startuml secuencia-conceptual
+title Diagrama de Secuencia \nLa Canchita de Carlos
+
+actor Administrador
+participant "Aplicación\n" as App
+participant "Servidor\n" as Servidor
+database "Base de Datos" as BD
+participant "Servicio de Correo" as Correo
+
+Administrador -> App : Quiero reservar la Cancha 1\npara el sabado de 6 a 7 pm
+App -> Servidor : Pide registrar esa reserva
+
+Servidor -> BD : ¿Hay algo mas reservado\nen esa cancha y horario?
+BD --> Servidor : Devuelve las reservas\nque ya existen ahi
+
+alt Ya existe algo en ese horario
+  Servidor --> App : No se puede,\nese horario ya esta ocupado
+  App --> Administrador : Muestra el error
+else Horario libre
+  Servidor -> BD : ¿Esa franja esta bloqueada\npor mantenimiento?
+  BD --> Servidor : No, esta disponible
+
+  Servidor -> BD : Guarda la nueva reserva
+  BD --> Servidor : Reserva guardada con exito
+
+  alt El cliente dejo su correo
+    Servidor -> Correo : Manda un correo de confirmacion\nal cliente
+    Correo --> Administrador : \nel cliente recibe su confirmacion
+  end
+
+  Servidor -> Correo : Avisa a los demas administradores\nque hay una reserva nueva
+  Servidor --> App : Reserva creada con exito
+  App --> Administrador : Muestra la confirmacion en pantalla
+end
+
+@enduml

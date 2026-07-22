@@ -13,7 +13,7 @@ export function makeAddCourtPhoto(deps: { courts: CourtRepository; storage: File
       mimeType: file.mimetype,
       originalName: file.originalname,
     });
-    // Bucket "canchas" es publico: result.url siempre viene con valor aqui.
+
     return deps.courts.updatePhoto(courtId, result.url!);
   };
 }

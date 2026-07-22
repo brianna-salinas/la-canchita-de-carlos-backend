@@ -4,6 +4,7 @@ import type { AdminDirectory } from "../domain/ports/AdminDirectory.js";
 import type { NotificationSender } from "../../notifications/application/ports/NotificationSender.js";
 import type { NotificationRepository } from "../../notifications/domain/ports/NotificationRepository.js";
 import { assertValidRange, hasConflict } from "../domain/model/Booking.js";
+import { assertNonEmpty, assertPositiveAmount, normalizeText } from "../../../platform/validation/validators.js";
 import { HttpError } from "../../../platform/errors/HttpError.js";
 
 export interface RegisterBookingInput {
@@ -38,9 +39,13 @@ export function makeRegisterBooking(deps: {
 
     try {
       assertValidRange({ startTime, endTime });
+      assertNonEmpty(input.customerName, "El nombre del cliente");
+      assertPositiveAmount(input.totalAmount, "El monto total");
     } catch (e) {
       throw new HttpError(400, (e as Error).message);
     }
+
+    const customerName = normalizeText(input.customerName);
 
     const booking = await deps.bookings.runTransaction(async (tx) => {
       const candidates = await tx.findActiveOverlapCandidates(input.courtId, date);
@@ -62,7 +67,7 @@ export function makeRegisterBooking(deps: {
       return tx.create({
         courtId: input.courtId,
         customerId,
-        customerName: input.customerName,
+        customerName,
         type: input.type,
         date,
         startTime,
@@ -77,7 +82,7 @@ export function makeRegisterBooking(deps: {
     if (input.customerEmail) {
       void deps.notifier.sendBookingConfirmation({
         to: input.customerEmail,
-        customerName: input.customerName,
+        customerName,
         courtName: court.name,
         date: input.date,
         startTime: input.startTime,

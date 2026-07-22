@@ -12,7 +12,7 @@ import { makeSearchBookings } from "../../application/searchBookings.usecase.js"
 import { makeRegisterBookingSeries } from "../../application/registerBookingSeries.usecase.js";
 import type { BookingStatus } from "../../domain/model/Booking.js";
 
-// Adaptador de entrada (anillo "Interfaces/REST"): traduce HTTP <-> casos de uso de Aplicacion.
+// Adaptador de entrada : traduce HTTP <-> casos de uso de Aplicacion.
 const registerBooking = makeRegisterBooking({
   bookings: bookingRepository,
   courts: courtRepository,

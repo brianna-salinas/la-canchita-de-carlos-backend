@@ -1,0 +1,94 @@
+@startuml payments-context
+title Bounded Context: Payments (soporte)
+
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+
+package "domain.model" {
+  enum PaymentMethod {
+    EFECTIVO
+    YAPE
+    OTRO
+  }
+
+  enum PaymentStatus {
+    PENDING
+    PARTIAL
+    PAID
+  }
+
+  class Payment {
+    +id: number
+    +bookingId: number
+    +amount: number
+    +method: PaymentMethod
+    +createdAt: Date
+  }
+
+  class PayableBooking {
+    +id: number
+    +totalAmount: number
+    +paidAmount: number
+  }
+
+  class "Payment (funciones de dominio)" as PaymentRules << (F,orchid) functions >> {
+    +assertAmountWithinTotal(booking, amountToAdd): void
+    +resolveStatus(booking, newPaidAmount): PaymentStatus
+  }
+
+  Payment "*" --> "1" PayableBooking : bookingId
+  PaymentRules ..> PayableBooking : opera sobre
+}
+
+package "domain.ports" {
+  interface PaymentRepository {
+    +findBookingOrThrow(bookingId): Promise<PayableBooking>
+    +registerPaymentAtomic(bookingId, amount, method, newPaidAmount, status): Promise<{booking, payment}>
+    +listPaymentsForBooking(bookingId): Promise<Payment[]>
+    +attachReceipt(bookingId, receiptPath): Promise<PayableBooking>
+    +getReceiptPath(bookingId): Promise<string?>
+  }
+
+  PaymentRepository ..> Payment
+  PaymentRepository ..> PayableBooking
+}
+
+package "infrastructure.persistence" {
+  class PrismaPaymentRepository {
+    +findBookingOrThrow(bookingId)
+    +registerPaymentAtomic(bookingId, amount, method, newPaidAmount, status)
+    +listPaymentsForBooking(bookingId)
+    +attachReceipt(bookingId, receiptPath)
+    +getReceiptPath(bookingId)
+  }
+
+  PrismaPaymentRepository ..|> PaymentRepository
+  note right of PrismaPaymentRepository
+    registerPaymentAtomic usa
+    prisma.$transaction para
+    crear el Payment y
+    actualizar el saldo del
+    Booking de forma atomica.
+  end note
+}
+
+package "application (casos de uso)" {
+  class registerPayment << (F,orchid) factory >>
+  class attachReceipt << (F,orchid) factory >>
+  class getReceiptSignedUrl << (F,orchid) factory >>
+  class listPaymentsForBooking << (F,orchid) factory >>
+
+  interface "FileStorage (platform)" as FileStorage {
+    +upload(input): Promise<UploadResult>
+    +createSignedUrl(path, expiresInSeconds): Promise<string>
+  }
+
+  registerPayment ..> PaymentRepository
+  attachReceipt ..> PaymentRepository
+  attachReceipt ..> FileStorage
+  getReceiptSignedUrl ..> PaymentRepository
+  getReceiptSignedUrl ..> FileStorage
+  listPaymentsForBooking ..> PaymentRepository
+}
+
+@enduml

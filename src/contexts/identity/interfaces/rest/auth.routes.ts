@@ -12,8 +12,6 @@ const bootstrapOwner = makeBootstrapOwner({ users: userRepository });
 
 export const authRouter = Router();
 
-// Arranque del sistema: crea al primer administrador dueno. Publico pero protegido por
-// SETUP_TOKEN + el guard de "ya existe un owner" (ver bootstrapOwner.usecase.ts).
 authRouter.post("/bootstrap-dueno", async (req, res, next) => {
   try {
     const owner = await bootstrapOwner(req.body);

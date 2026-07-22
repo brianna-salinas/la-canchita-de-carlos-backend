@@ -1,0 +1,214 @@
+@startuml bookings-context
+title Bounded Context: Bookings
+
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+
+package "domain.model" {
+  enum BookingStatus {
+    BOOKED
+    CANCELLED
+    COMPLETED
+  }
+
+  enum PaymentStatus {
+    PENDING
+    PARTIAL
+    PAID
+  }
+
+  enum BookingSeriesType {
+    SINGLE
+    MULTIDAY
+    RECURRING
+  }
+
+  enum SeriesPaymentMode {
+    INDIVIDUAL
+    LUMP_SUM
+  }
+
+  class Booking {
+    +id: number
+    +courtId: number
+    +customerId: number?
+    +customerName: string
+    +type: string?
+    +date: Date
+    +startTime: Date
+    +endTime: Date
+    +status: BookingStatus
+    +totalAmount: number
+    +paidAmount: number
+    +paymentStatus: PaymentStatus
+    +receiptUrl: string?
+    +bookingType: BookingSeriesType
+    +seriesId: string?
+    +seriesPaymentMode: SeriesPaymentMode?
+    +seriesLabel: string?
+    +seriesTotalDates: number?
+    +seriesIndex: number?
+  }
+
+  class TimeRange {
+    +startTime: Date
+    +endTime: Date
+  }
+
+  class "Booking (funciones de dominio)" as BookingRules << (F,orchid) functions >> {
+    +overlaps(candidate, existing): boolean
+    +hasConflict(candidate, activeBookings, excludeId?): boolean
+    +assertValidRange(range): void
+  }
+
+  class Court {
+    +id: number
+    +name: string
+    +sport: string
+    +surface: string?
+    +pricePerHour: number
+    +photoUrl: string?
+  }
+
+  class "Court (funciones de dominio)" as CourtRules << (F,orchid) functions >> {
+    +assertValidPrice(pricePerHour): void
+  }
+
+  class ScheduleBlock {
+    +id: number
+    +courtId: number
+    +date: Date
+    +time: Date
+    +reason: string?
+  }
+
+  class "ScheduleBlock (funciones de dominio)" as ScheduleBlockRules << (F,orchid) functions >> {
+    +assertValidBlockRange(startTime, endTime): void
+    +hourlySlots(startTime, endTime): Date[]
+  }
+
+  Booking "1" o-- "1" TimeRange : usa
+  Booking "*" --> "1" Court : courtId
+  ScheduleBlock "*" --> "1" Court : courtId
+  BookingRules ..> Booking : opera sobre
+  CourtRules ..> Court : opera sobre
+  ScheduleBlockRules ..> ScheduleBlock : opera sobre
+}
+
+package "domain.ports" {
+  interface BookingRepository {
+    +runTransaction(fn): Promise<T>
+    +findActiveOverlapCandidates(courtId, date): Promise<TimeRange[]>
+    +isTimeBlocked(courtId, date, range): Promise<boolean>
+    +createEmbeddedCustomer(data): Promise<{id}>
+    +create(data): Promise<Booking>
+    +update(bookingId, data): Promise<Booking>
+    +cancel(bookingId): Promise<Booking>
+    +findByIdOrThrow(bookingId): Promise<Booking>
+    +search(filters): Promise<Booking[]>
+  }
+
+  interface CourtRepository {
+    +findByName(name): Promise<Court?>
+    +create(data): Promise<Court>
+    +updatePrice(courtId, price): Promise<Court>
+    +updatePhoto(courtId, photoUrl): Promise<Court>
+    +getConsolidatedAvailability(date): Promise<CourtAvailability[]>
+    +findByIdOrThrow(courtId): Promise<Court>
+  }
+
+  interface ScheduleBlockRepository {
+    +createMany(courtId, date, times, reason?): Promise<ScheduleBlock[]>
+    +listForCourtAndDate(courtId, date): Promise<ScheduleBlock[]>
+    +deleteById(blockId): Promise<void>
+  }
+
+  interface AdminDirectory {
+    +listOtherActiveAdmins(excludeUserId?): Promise<AdminSummary[]>
+    +findAdminNameOrThrow(userId): Promise<string>
+  }
+
+  class AdminSummary {
+    +id: number
+    +email: string
+  }
+
+  AdminDirectory ..> AdminSummary
+  BookingRepository ..> Booking
+  CourtRepository ..> Court
+  ScheduleBlockRepository ..> ScheduleBlock
+}
+
+package "infrastructure.persistence" {
+  class PrismaBookingRepository {
+    +runTransaction(fn)
+    +findActiveOverlapCandidates(courtId, date)
+    +isTimeBlocked(courtId, date, range)
+    +createEmbeddedCustomer(data)
+    +create(data)
+    +update(bookingId, data)
+    +cancel(bookingId)
+    +findByIdOrThrow(bookingId)
+    +search(filters)
+  }
+
+  class PrismaCourtRepository {
+    +findByName(name)
+    +create(data)
+    +updatePrice(courtId, price)
+    +updatePhoto(courtId, photoUrl)
+    +getConsolidatedAvailability(date)
+    +findByIdOrThrow(courtId)
+  }
+
+  class PrismaScheduleBlockRepository {
+    +createMany(courtId, date, times, reason?)
+    +listForCourtAndDate(courtId, date)
+    +deleteById(blockId)
+  }
+
+  class PrismaAdminDirectory {
+    +listOtherActiveAdmins(excludeUserId?)
+    +findAdminNameOrThrow(userId)
+  }
+
+  PrismaBookingRepository ..|> BookingRepository
+  PrismaCourtRepository ..|> CourtRepository
+  PrismaScheduleBlockRepository ..|> ScheduleBlockRepository
+  PrismaAdminDirectory ..|> AdminDirectory
+}
+
+package "application (casos de uso)" {
+  class registerBooking << (F,orchid) factory >>
+  class registerBookingSeries << (F,orchid) factory >>
+  class editBooking << (F,orchid) factory >>
+  class cancelBooking << (F,orchid) factory >>
+  class searchBookings << (F,orchid) factory >>
+  class registerCourt << (F,orchid) factory >>
+  class updateCourtPrice << (F,orchid) factory >>
+  class addCourtPhoto << (F,orchid) factory >>
+  class getConsolidatedAvailability << (F,orchid) factory >>
+  class blockSchedule << (F,orchid) factory >>
+  class listScheduleBlocks << (F,orchid) factory >>
+  class unblockSchedule << (F,orchid) factory >>
+
+  registerBooking ..> BookingRepository
+  registerBooking ..> CourtRepository
+  registerBooking ..> AdminDirectory
+  registerBookingSeries ..> BookingRepository
+  registerBookingSeries ..> CourtRepository
+  registerBookingSeries ..> AdminDirectory
+  editBooking ..> BookingRepository
+  cancelBooking ..> BookingRepository
+  searchBookings ..> BookingRepository
+  registerCourt ..> CourtRepository
+  updateCourtPrice ..> CourtRepository
+  addCourtPhoto ..> CourtRepository
+  getConsolidatedAvailability ..> CourtRepository
+  blockSchedule ..> ScheduleBlockRepository
+  blockSchedule ..> BookingRepository
+  listScheduleBlocks ..> ScheduleBlockRepository
+  unblockSchedule ..> ScheduleBlockRepository
+}
+
+@enduml

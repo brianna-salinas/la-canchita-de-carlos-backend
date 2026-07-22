@@ -12,7 +12,8 @@ export class PrismaNotificationRepository implements NotificationRepository {
   }
 
   async listForUser(userId: number): Promise<Notification[]> {
-    return prisma.notification.findMany({ where: { userId }, orderBy: { createdAt: "desc" } });
+    const rows = await prisma.notification.findMany({ where: { userId }, orderBy: { createdAt: "desc" } });
+    return rows.map((row) => ({ ...row, userId: row.userId as number }));
   }
 
   async markRead(notificationId: number): Promise<void> {

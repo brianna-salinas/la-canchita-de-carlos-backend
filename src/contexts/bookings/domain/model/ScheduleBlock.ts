@@ -1,5 +1,3 @@
-// Entidad de dominio pura del aggregate ScheduleBlock (RF07/RF32): franja bloqueada
-// manualmente por mantenimiento, con motivo opcional, excluida de la disponibilidad.
 export interface ScheduleBlock {
   id: number;
   courtId: number;
@@ -14,8 +12,6 @@ export function assertValidBlockRange(startTime: Date, endTime: Date): void {
   }
 }
 
-// Genera los puntos horarios (uno por hora) entre startTime y endTime, ya que la
-// disponibilidad se chequea contra bloques de una hora (misma granularidad que Booking).
 export function hourlySlots(startTime: Date, endTime: Date): Date[] {
   const slots: Date[] = [];
   const cursor = new Date(startTime);

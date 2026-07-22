@@ -7,10 +7,6 @@ import type { FileStorage, UploadFileInput, UploadResult } from "./ports/FileSto
 const SUPABASE_URL = process.env.SUPABASE_URL ?? "";
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
 
-// Un solo bucket: la seguridad de "comprobantes" se resuelve con policies RLS de
-// storage.objects (ver SQL entregado a Brianna), no separando el bucket. El bucket debe
-// crearse como PRIVADO en Supabase; las policies dan lectura publica solo a
-// canchas/perfiles/clientes, "comprobantes" solo es legible por el service_role (backend).
 const BUCKET = process.env.SUPABASE_STORAGE_BUCKET ?? "la-canchita-de-carlos";
 
 const supabase =

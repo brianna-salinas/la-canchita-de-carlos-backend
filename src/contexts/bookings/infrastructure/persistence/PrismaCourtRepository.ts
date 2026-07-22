@@ -2,22 +2,30 @@ import { prisma } from "../../../../db.js";
 import type { CourtRepository, NewCourtData, CourtAvailability } from "../../domain/ports/CourtRepository.js";
 import type { Court } from "../../domain/model/Court.js";
 
+function toCourt(row: any): Court {
+  return { ...row, pricePerHour: Number(row.pricePerHour) };
+}
+
 // Adaptador de salida: implementa CourtRepository contra Prisma/PostgreSQL.
 export class PrismaCourtRepository implements CourtRepository {
   async findByName(name: string): Promise<Court | null> {
-    return prisma.court.findFirst({ where: { name } });
+    const row = await prisma.court.findFirst({ where: { name } });
+    return row ? toCourt(row) : null;
   }
 
   async create(data: NewCourtData): Promise<Court> {
-    return prisma.court.create({ data });
+    const row = await prisma.court.create({ data });
+    return toCourt(row);
   }
 
   async updatePrice(courtId: number, pricePerHour: number): Promise<Court> {
-    return prisma.court.update({ where: { id: courtId }, data: { pricePerHour } });
+    const row = await prisma.court.update({ where: { id: courtId }, data: { pricePerHour } });
+    return toCourt(row);
   }
 
   async updatePhoto(courtId: number, photoUrl: string): Promise<Court> {
-    return prisma.court.update({ where: { id: courtId }, data: { photoUrl } });
+    const row = await prisma.court.update({ where: { id: courtId }, data: { photoUrl } });
+    return toCourt(row);
   }
 
   async getConsolidatedAvailability(date: Date): Promise<CourtAvailability[]> {
@@ -30,7 +38,8 @@ export class PrismaCourtRepository implements CourtRepository {
   }
 
   async findByIdOrThrow(courtId: number): Promise<Court> {
-    return prisma.court.findUniqueOrThrow({ where: { id: courtId } });
+    const row = await prisma.court.findUniqueOrThrow({ where: { id: courtId } });
+    return toCourt(row);
   }
 }
 

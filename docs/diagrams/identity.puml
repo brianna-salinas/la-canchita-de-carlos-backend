@@ -1,0 +1,154 @@
+@startuml identity-context
+title Bounded Context: Identity & Access
+
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+
+package "domain.model" {
+  enum UserStatus {
+    PENDING_VERIFICATION
+    ACTIVE
+    INACTIVE
+  }
+
+  class User {
+    +id: number
+    +name: string
+    +username: string
+    +email: string
+    +passwordHash: string
+    +status: UserStatus
+    +isOwner: boolean
+    +lastAccess: Date?
+    +photoUrl: string?
+  }
+
+  class "User (funciones de dominio)" as UserRules << (F,orchid) functions >> {
+    +assertCanLogin(user): void
+    +usernameFromEmail(email): string
+  }
+
+  enum AccessRequestStatus {
+    PENDING
+    APPROVED
+    REJECTED
+  }
+
+  class AccessRequest {
+    +id: number
+    +name: string
+    +email: string
+    +phone: string?
+    +passwordHash: string
+    +status: AccessRequestStatus
+    +createdAt: Date
+  }
+
+  class "AccessRequest (funciones de dominio)" as AccessRequestRules << (F,orchid) functions >> {
+    +assertPending(request): void
+  }
+
+  class EmailVerificationToken {
+    +id: number
+    +userId: number
+    +used: boolean
+    +expiresAt: Date
+  }
+
+  UserRules ..> User
+  AccessRequestRules ..> AccessRequest
+  AccessRequest ..> User : crea, al aprobarse
+  EmailVerificationToken "*" --> "1" User : userId
+}
+
+package "domain.ports" {
+  interface UserRepository {
+    +findByUsernameOrEmail(value): Promise<User?>
+    +findByEmail(email): Promise<User?>
+    +findByIdOrThrow(userId): Promise<User>
+    +countOwners(): Promise<number>
+    +create(data): Promise<User>
+    +promoteToOwner(userId): Promise<User>
+    +activate(userId): Promise<User>
+    +updateLastAccess(userId): Promise<void>
+    +updateEmail(userId, email): Promise<User>
+    +updatePasswordHash(userId, hash): Promise<void>
+    +listActiveAdmins(): Promise<User[]>
+    +listOwnerEmails(): Promise<string[]>
+    +updatePhoto(userId, photoUrl): Promise<User>
+  }
+
+  interface AccessRequestRepository {
+    +findByEmailPending(email): Promise<AccessRequest?>
+    +create(data): Promise<AccessRequest>
+    +findByIdOrThrow(requestId): Promise<AccessRequest>
+    +markApproved(requestId, createdUserId): Promise<void>
+    +markRejected(requestId): Promise<void>
+    +listPending(): Promise<AccessRequest[]>
+  }
+
+  interface SessionRepository {
+    +create(data): Promise<void>
+    +revoke(userId, tokenHash): Promise<void>
+    +revokeAllForUser(userId): Promise<void>
+  }
+
+  interface EmailVerificationTokenRepository {
+    +create(data): Promise<void>
+    +findByTokenHash(tokenHash): Promise<EmailVerificationToken?>
+    +markUsedAndActivateUser(tokenId, userId): Promise<void>
+  }
+
+  UserRepository ..> User
+  AccessRequestRepository ..> AccessRequest
+  EmailVerificationTokenRepository ..> EmailVerificationToken
+}
+
+package "infrastructure.persistence" {
+  class PrismaUserRepository
+  class PrismaAccessRequestRepository
+  class PrismaSessionRepository
+  class PrismaEmailVerificationTokenRepository
+
+  PrismaUserRepository ..|> UserRepository
+  PrismaAccessRequestRepository ..|> AccessRequestRepository
+  PrismaSessionRepository ..|> SessionRepository
+  PrismaEmailVerificationTokenRepository ..|> EmailVerificationTokenRepository
+}
+
+package "application (casos de uso)" {
+  class login << (F,orchid) factory >>
+  class logout << (F,orchid) factory >>
+  class bootstrapOwner << (F,orchid) factory >>
+  class promoteToOwner << (F,orchid) factory >>
+  class requestAdminRegistration << (F,orchid) factory >>
+  class authorizeAdminRequest << (F,orchid) factory >>
+  class rejectAdminRequest << (F,orchid) factory >>
+  class verifyEmail << (F,orchid) factory >>
+  class listPendingRequests << (F,orchid) factory >>
+  class listActiveAdmins << (F,orchid) factory >>
+  class updateOwnEmail << (F,orchid) factory >>
+  class changeOwnPassword << (F,orchid) factory >>
+  class uploadUserPhoto << (F,orchid) factory >>
+
+  login ..> UserRepository
+  login ..> SessionRepository
+  logout ..> SessionRepository
+  bootstrapOwner ..> UserRepository
+  promoteToOwner ..> UserRepository
+  requestAdminRegistration ..> UserRepository
+  requestAdminRegistration ..> AccessRequestRepository
+  authorizeAdminRequest ..> UserRepository
+  authorizeAdminRequest ..> AccessRequestRepository
+  authorizeAdminRequest ..> EmailVerificationTokenRepository
+  rejectAdminRequest ..> AccessRequestRepository
+  verifyEmail ..> EmailVerificationTokenRepository
+  listPendingRequests ..> AccessRequestRepository
+  listActiveAdmins ..> UserRepository
+  updateOwnEmail ..> UserRepository
+  changeOwnPassword ..> UserRepository
+  changeOwnPassword ..> SessionRepository
+  uploadUserPhoto ..> UserRepository
+}
+
+@enduml

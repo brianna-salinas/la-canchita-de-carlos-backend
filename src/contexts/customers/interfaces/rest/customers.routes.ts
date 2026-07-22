@@ -73,7 +73,7 @@ customersRouter.get("/:id/historial", async (req, res, next) => {
   }
 });
 
-// TS10 (analogo) — POST /customers/:id/foto (carpeta publica "clientes").
+// TS10 — POST /customers/:id/foto (carpeta publica "clientes").
 customersRouter.post("/:id/foto", upload.single("foto"), async (req, res, next) => {
   try {
     if (!req.file) {

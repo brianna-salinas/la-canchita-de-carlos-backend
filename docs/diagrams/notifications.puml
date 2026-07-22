@@ -1,0 +1,89 @@
+@startuml notifications-context
+title Bounded Context: Notifications
+
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+
+package "domain.model" {
+  enum NotificationType {
+    ACCESS_REQUEST
+    PAYMENT_PENDING
+    NEW_BOOKING
+    BOOKING_CANCELLED
+    COURT_MAINTENANCE
+    GENERAL
+  }
+
+  class Notification {
+    +id: number
+    +userId: number
+    +type: NotificationType
+    +title: string
+    +message: string?
+    +linkUrl: string?
+    +read: boolean
+    +createdAt: Date
+  }
+}
+
+package "domain.ports" {
+  interface NotificationRepository {
+    +createForUsers(userIds, data): Promise<void>
+    +listForUser(userId): Promise<Notification[]>
+    +markRead(notificationId): Promise<void>
+  }
+
+  NotificationRepository ..> Notification
+}
+
+package "application.ports" {
+  interface NotificationSender {
+    +sendBookingConfirmation(params): Promise<void>
+    +sendAdminDecision(params): Promise<void>
+    +sendEmailVerification(params): Promise<void>
+    +sendNewAccessRequestAlert(params): Promise<void>
+    +sendNewBookingAlert(params): Promise<void>
+  }
+
+  note right of NotificationSender
+    Puerto de correo (email).
+    Un fallo de envio nunca
+    bloquea al llamador
+    (RF23/RF24): todo retorna void.
+  end note
+}
+
+package "infrastructure" {
+  class PrismaNotificationRepository {
+    +createForUsers(userIds, data)
+    +listForUser(userId)
+    +markRead(notificationId)
+  }
+
+  class ResendNotificationSender {
+    +sendBookingConfirmation(params)
+    +sendAdminDecision(params)
+    +sendEmailVerification(params)
+    +sendNewAccessRequestAlert(params)
+    +sendNewBookingAlert(params)
+  }
+
+  PrismaNotificationRepository ..|> NotificationRepository
+  ResendNotificationSender ..|> NotificationSender
+}
+
+package "application (casos de uso)" {
+  class listMyNotifications << (F,orchid) factory >>
+  class markNotificationRead << (F,orchid) factory >>
+
+  listMyNotifications ..> NotificationRepository
+  markNotificationRead ..> NotificationRepository
+}
+
+note bottom
+  NotificationRepository = in-app (persistido en tabla notifications).
+  NotificationSender = correo (Resend). Son dos puertos distintos
+  que otros contextos (bookings, identity) consumen juntos.
+end note
+
+@enduml

@@ -1,5 +1,3 @@
-// Entidad de dominio pura del aggregate Court (parte del bounded context Bookings:
-// la disponibilidad de canchas es inseparable de la regla de no-doble-reserva).
 export interface Court {
   id: number;
   name: string;

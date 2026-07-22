@@ -1,0 +1,83 @@
+@startuml customers-context
+title Bounded Context: Customers
+
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+
+package "domain.model" {
+  enum CustomerStatus {
+    ACTIVE
+    INACTIVE
+  }
+
+  class Customer {
+    +id: number
+    +name: string
+    +phone: string
+    +documentNumber: string?
+    +status: CustomerStatus
+    +photoUrl: string?
+  }
+}
+
+package "domain.ports" {
+  class NewCustomerData {
+    +name: string
+    +phone: string
+    +documentNumber: string?
+  }
+
+  class CustomerHistoryEntry {
+    +id: number
+    +date: Date
+    +startTime: Date
+    +endTime: Date
+    +totalAmount: number
+    +paidAmount: number
+    +court: {id, name}
+  }
+
+  interface CustomerRepository {
+    +create(data): Promise<Customer>
+    +update(customerId, data): Promise<Customer>
+    +deactivate(customerId): Promise<Customer>
+    +list(search?): Promise<Customer[]>
+    +getBookingHistory(customerId): Promise<CustomerHistoryEntry[]>
+    +updatePhoto(customerId, photoUrl): Promise<Customer>
+  }
+
+  CustomerRepository ..> Customer
+  CustomerRepository ..> NewCustomerData
+  CustomerRepository ..> CustomerHistoryEntry
+}
+
+package "infrastructure.persistence" {
+  class PrismaCustomerRepository {
+    +create(data)
+    +update(customerId, data)
+    +deactivate(customerId)
+    +list(search?)
+    +getBookingHistory(customerId)
+    +updatePhoto(customerId, photoUrl)
+  }
+
+  PrismaCustomerRepository ..|> CustomerRepository
+}
+
+package "application (casos de uso)" {
+  class registerCustomer << (F,orchid) factory >>
+  class updateCustomer << (F,orchid) factory >>
+  class deactivateCustomer << (F,orchid) factory >>
+  class listCustomers << (F,orchid) factory >>
+  class getCustomerHistory << (F,orchid) factory >>
+  class uploadCustomerPhoto << (F,orchid) factory >>
+
+  registerCustomer ..> CustomerRepository
+  updateCustomer ..> CustomerRepository
+  deactivateCustomer ..> CustomerRepository
+  listCustomers ..> CustomerRepository
+  getCustomerHistory ..> CustomerRepository
+  uploadCustomerPhoto ..> CustomerRepository
+}
+
+@enduml

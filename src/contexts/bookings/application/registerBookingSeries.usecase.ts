@@ -5,6 +5,7 @@ import type { AdminDirectory } from "../domain/ports/AdminDirectory.js";
 import type { NotificationSender } from "../../notifications/application/ports/NotificationSender.js";
 import type { NotificationRepository } from "../../notifications/domain/ports/NotificationRepository.js";
 import { assertValidRange, hasConflict } from "../domain/model/Booking.js";
+import { assertNonEmpty, assertPositiveAmount, normalizeText } from "../../../platform/validation/validators.js";
 import { HttpError } from "../../../platform/errors/HttpError.js";
 
 export interface RegisterBookingSeriesInput {
@@ -21,19 +22,14 @@ export interface RegisterBookingSeriesInput {
   seriesPaymentMode: "INDIVIDUAL" | "LUMP_SUM";
   seriesLabel?: string;
   bookingType?: "MULTIDAY" | "RECURRING"; // default RECURRING si hay mas de 1 fecha
-  actorUserId?: number; // quien registra (para avisar al resto de admins, no al mismo).
+  actorUserId?: number;
 }
 
 // Reservas multidia/recurrentes (schema: bookingType/seriesId/seriesPaymentMode/etc.,
 // ya soportado por el frontend). El backend generaba unicamente Booking SINGLE; este
 // caso de uso crea N Booking en una misma transaccion, todos ligados por seriesId,
 // revalidando RF06 (no-doble-reserva) fecha por fecha.
-//
-// Interpretacion de totalAmount segun seriesPaymentMode (a confirmar con el frontend):
-// - INDIVIDUAL: totalAmount es el monto POR FECHA (se cobra cada dia por separado).
-// - LUMP_SUM: totalAmount es el monto TOTAL de toda la serie, cargado al primer Booking
-//   (el "ancla"); las demas fechas quedan con totalAmount 0 porque el pago se registra
-//   una sola vez contra esa fecha ancla.
+
 export function makeRegisterBookingSeries(deps: {
   bookings: BookingRepository;
   courts: CourtRepository;
@@ -50,9 +46,13 @@ export function makeRegisterBookingSeries(deps: {
     const endTime = new Date(`1970-01-01T${input.endTime}:00Z`);
     try {
       assertValidRange({ startTime, endTime });
+      assertNonEmpty(input.customerName, "El nombre del cliente");
+      assertPositiveAmount(input.totalAmount, "El monto total");
     } catch (e) {
       throw new HttpError(400, (e as Error).message);
     }
+
+    const customerName = normalizeText(input.customerName);
 
     const seriesId = randomUUID();
     const total = input.dates.length;
@@ -67,14 +67,15 @@ export function makeRegisterBookingSeries(deps: {
 
       const created = [];
       for (let i = 0; i < input.dates.length; i++) {
-        const date = new Date(input.dates[i]);
+        const dateStr = input.dates[i]!;
+        const date = new Date(dateStr);
 
         const candidates = await tx.findActiveOverlapCandidates(input.courtId, date);
         if (hasConflict({ startTime, endTime }, candidates)) {
-          throw new HttpError(409, `Ya existe un alquiler activo para esa cancha el ${input.dates[i]}.`);
+          throw new HttpError(409, `Ya existe un alquiler activo para esa cancha el ${dateStr}.`);
         }
         if (await tx.isTimeBlocked(input.courtId, date, { startTime, endTime })) {
-          throw new HttpError(409, `Esa franja esta bloqueada por mantenimiento el ${input.dates[i]}.`);
+          throw new HttpError(409, `Esa franja esta bloqueada por mantenimiento el ${dateStr}.`);
         }
 
         const amountForThisDate = input.seriesPaymentMode === "LUMP_SUM" ? (i === 0 ? input.totalAmount : 0) : input.totalAmount;
@@ -82,7 +83,7 @@ export function makeRegisterBookingSeries(deps: {
         const booking = await tx.create({
           courtId: input.courtId,
           customerId,
-          customerName: input.customerName,
+          customerName,
           type: input.type,
           date,
           startTime,
@@ -107,7 +108,7 @@ export function makeRegisterBookingSeries(deps: {
     if (input.customerEmail) {
       void deps.notifier.sendBookingConfirmation({
         to: input.customerEmail,
-        customerName: input.customerName,
+        customerName,
         courtName: court.name,
         date: dateLabel,
         startTime: input.startTime,

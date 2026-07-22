@@ -6,8 +6,6 @@ import type { PayableBooking, Payment, PaymentMethod } from "../model/Payment.js
 export interface PaymentRepository {
   findBookingOrThrow(bookingId: number): Promise<PayableBooking>;
 
-  // Crea el registro de Payment (con su metodo) y actualiza el saldo del Booking
-  // en una unica transaccion (atomico: nunca queda un Payment sin reflejarse en el saldo).
   registerPaymentAtomic(
     bookingId: number,
     amount: number,
@@ -17,7 +15,6 @@ export interface PaymentRepository {
   ): Promise<{ booking: PayableBooking; payment: Payment }>;
 
   listPaymentsForBooking(bookingId: number): Promise<Payment[]>;
-  // receiptPath: desde el bucket privado, guardamos la ruta interna (no una URL publica).
   attachReceipt(bookingId: number, receiptPath: string): Promise<PayableBooking>;
   // Recupera la ruta guardada para poder generar una signed URL bajo demanda (TS08).
   getReceiptPath(bookingId: number): Promise<string | null>;

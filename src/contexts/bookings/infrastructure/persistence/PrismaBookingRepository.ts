@@ -10,7 +10,15 @@ import type { Booking, TimeRange } from "../../domain/model/Booking.js";
 
 type Db = typeof prisma | Prisma.TransactionClient;
 
-// Adaptador de salida (anillo "Infraestructura" de 4.0): implementa BookingRepository
+function toBooking(row: any): Booking {
+  return {
+    ...row,
+    totalAmount: Number(row.totalAmount),
+    paidAmount: Number(row.paidAmount),
+  };
+}
+
+// Adaptador de salida : implementa BookingRepository
 // contra Prisma/PostgreSQL. Si el negocio cambia de ORM, solo se reemplaza esta clase.
 export class PrismaBookingRepository implements BookingRepository {
   constructor(private readonly db: Db = prisma) {}
@@ -38,23 +46,27 @@ export class PrismaBookingRepository implements BookingRepository {
   }
 
   async create(data: NewBookingData): Promise<Booking> {
-    return this.db.booking.create({ data }) as Promise<Booking>;
+    const row = await this.db.booking.create({ data });
+    return toBooking(row);
   }
 
   async update(bookingId: number, data: Partial<NewBookingData>): Promise<Booking> {
-    return this.db.booking.update({ where: { id: bookingId }, data }) as Promise<Booking>;
+    const row = await this.db.booking.update({ where: { id: bookingId }, data });
+    return toBooking(row);
   }
 
   async cancel(bookingId: number): Promise<Booking> {
-    return this.db.booking.update({ where: { id: bookingId }, data: { status: "CANCELLED" } }) as Promise<Booking>;
+    const row = await this.db.booking.update({ where: { id: bookingId }, data: { status: "CANCELLED" } });
+    return toBooking(row);
   }
 
   async findByIdOrThrow(bookingId: number): Promise<Booking> {
-    return this.db.booking.findUniqueOrThrow({ where: { id: bookingId } }) as Promise<Booking>;
+    const row = await this.db.booking.findUniqueOrThrow({ where: { id: bookingId } });
+    return toBooking(row);
   }
 
   async search(filters: SearchFilters): Promise<BookingWithRelations[]> {
-    return this.db.booking.findMany({
+    const rows = await this.db.booking.findMany({
       where: {
         courtId: filters.courtId,
         customerId: filters.customerId,
@@ -63,7 +75,8 @@ export class PrismaBookingRepository implements BookingRepository {
       },
       orderBy: { date: "desc" },
       include: { court: true, customer: true },
-    }) as Promise<BookingWithRelations[]>;
+    });
+    return rows.map((row) => toBooking(row) as BookingWithRelations);
   }
 }
 
