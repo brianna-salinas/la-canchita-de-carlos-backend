@@ -17,9 +17,11 @@ export interface UserRepository {
   create(data: NewUserData): Promise<User>;
   promoteToOwner(userId: number): Promise<User>;
   activate(userId: number): Promise<User>;
+  deactivate(userId: number): Promise<User>;
   updateLastAccess(userId: number): Promise<void>;
   updateEmail(userId: number, email: string): Promise<User>;
   updatePasswordHash(userId: number, passwordHash: string): Promise<void>;
+  updateProfile(userId: number, data: { name?: string; username?: string }): Promise<User>;
   listActiveAdmins(): Promise<Pick<User, "id" | "name" | "email" | "isOwner" | "lastAccess">[]>;
   listOwnerEmails(): Promise<string[]>;
   updatePhoto(userId: number, photoUrl: string): Promise<User>;

@@ -17,6 +17,9 @@ import { makeUpdateOwnEmail } from "../../application/updateOwnEmail.usecase.js"
 import { makeChangeOwnPassword } from "../../application/changeOwnPassword.usecase.js";
 import { makePromoteToOwner } from "../../application/promoteToOwner.usecase.js";
 import { makeUploadUserPhoto } from "../../application/uploadUserPhoto.usecase.js";
+import { makeDeactivateAdmin } from "../../application/deactivateAdmin.usecase.js";
+import { makeDeactivateOwnAccount } from "../../application/deactivateOwnAccount.usecase.js";
+import { makeUpdateOwnProfile } from "../../application/updateOwnProfile.usecase.js";
 import { sessionRepository } from "../../infrastructure/persistence/PrismaSessionRepository.js";
 import { HttpError } from "../../../../platform/errors/HttpError.js";
 
@@ -42,6 +45,9 @@ const updateOwnEmail = makeUpdateOwnEmail({ users: userRepository });
 const changeOwnPassword = makeChangeOwnPassword({ users: userRepository, sessions: sessionRepository });
 const promoteToOwner = makePromoteToOwner({ users: userRepository });
 const uploadUserPhoto = makeUploadUserPhoto({ users: userRepository, storage });
+const deactivateAdmin = makeDeactivateAdmin({ users: userRepository });
+const deactivateOwnAccount = makeDeactivateOwnAccount({ users: userRepository, sessions: sessionRepository });
+const updateOwnProfile = makeUpdateOwnProfile({ users: userRepository });
 
 export const usersRouter = Router();
 
@@ -132,6 +138,37 @@ usersRouter.patch("/me/correo", async (req, res, next) => {
 usersRouter.patch("/me/contrasena", async (req, res, next) => {
   try {
     const result = await changeOwnPassword(req.user!.userId, req.body.currentPassword, req.body.newPassword);
+    res.status(200).json(result);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// US26-US30 — PATCH /users/me/perfil (nombre y/o usuario propios).
+usersRouter.patch("/me/perfil", async (req, res, next) => {
+  try {
+    const result = await updateOwnProfile(req.user!.userId, req.body);
+    res.status(200).json(result);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// US26-US30 — DELETE /users/me (el usuario elimina/desactiva su propia cuenta).
+// Debe declararse antes de DELETE /:id para que "me" no se interprete como un id numerico.
+usersRouter.delete("/me", async (req, res, next) => {
+  try {
+    const result = await deactivateOwnAccount(req.user!.userId);
+    res.status(200).json(result);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// US26-US30 — DELETE /users/:id (un dueno desactiva la cuenta de otro administrador).
+usersRouter.delete("/:id", requireOwner, async (req, res, next) => {
+  try {
+    const result = await deactivateAdmin(req.user!.userId, Number(req.params.id));
     res.status(200).json(result);
   } catch (err) {
     next(err);

@@ -1,3 +1,5 @@
+export type CourtStatus = "ACTIVE" | "MAINTENANCE";
+
 export interface Court {
   id: number;
   name: string;
@@ -5,6 +7,9 @@ export interface Court {
   surface?: string | null;
   pricePerHour: number;
   photoUrl?: string | null;
+  status: CourtStatus;
+  enabled: boolean;
+  description?: string | null;
 }
 
 // RF12 — el precio por hora nunca puede ser cero ni negativo. Regla pura.

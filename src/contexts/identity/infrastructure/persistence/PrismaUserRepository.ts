@@ -32,6 +32,10 @@ export class PrismaUserRepository implements UserRepository {
     return prisma.user.update({ where: { id: userId }, data: { status: "ACTIVE" } });
   }
 
+  async deactivate(userId: number): Promise<User> {
+    return prisma.user.update({ where: { id: userId }, data: { status: "INACTIVE" } });
+  }
+
   async updateLastAccess(userId: number): Promise<void> {
     await prisma.user.update({ where: { id: userId }, data: { lastAccess: new Date() } });
   }
@@ -42,6 +46,10 @@ export class PrismaUserRepository implements UserRepository {
 
   async updatePasswordHash(userId: number, passwordHash: string): Promise<void> {
     await prisma.user.update({ where: { id: userId }, data: { passwordHash } });
+  }
+
+  async updateProfile(userId: number, data: { name?: string; username?: string }): Promise<User> {
+    return prisma.user.update({ where: { id: userId }, data });
   }
 
   async listActiveAdmins() {

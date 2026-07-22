@@ -4,6 +4,8 @@ import { requireAuth } from "../../../../platform/middlewares/auth.middleware.js
 import { courtRepository } from "../../infrastructure/persistence/PrismaCourtRepository.js";
 import { SupabaseFileStorage } from "../../../../platform/storage/SupabaseFileStorage.js";
 import { makeRegisterCourt } from "../../application/registerCourt.usecase.js";
+import { makeUpdateCourt } from "../../application/updateCourt.usecase.js";
+import { makeDeactivateCourt } from "../../application/deactivateCourt.usecase.js";
 import { makeUpdateCourtPrice } from "../../application/updateCourtPrice.usecase.js";
 import { makeGetConsolidatedAvailability } from "../../application/getConsolidatedAvailability.usecase.js";
 import { makeAddCourtPhoto } from "../../application/addCourtPhoto.usecase.js";
@@ -17,6 +19,8 @@ const upload = multer({ storage: multer.memoryStorage() });
 const storage = new SupabaseFileStorage();
 
 const registerCourt = makeRegisterCourt({ courts: courtRepository });
+const updateCourt = makeUpdateCourt({ courts: courtRepository });
+const deactivateCourt = makeDeactivateCourt({ courts: courtRepository });
 const updateCourtPrice = makeUpdateCourtPrice({ courts: courtRepository });
 const getConsolidatedAvailability = makeGetConsolidatedAvailability({ courts: courtRepository });
 const addCourtPhoto = makeAddCourtPhoto({ courts: courtRepository, storage });
@@ -32,6 +36,26 @@ courtsRouter.post("/", async (req, res, next) => {
   try {
     const court = await registerCourt(req.body);
     res.status(201).json(court);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// US26-US30 — PATCH /courts/:id (nombre, deporte, superficie, descripcion, estado).
+courtsRouter.patch("/:id", async (req, res, next) => {
+  try {
+    const court = await updateCourt(Number(req.params.id), req.body);
+    res.status(200).json(court);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// US26-US30 — DELETE /courts/:id (soft-delete: enabled=false).
+courtsRouter.delete("/:id", async (req, res, next) => {
+  try {
+    const court = await deactivateCourt(Number(req.params.id));
+    res.status(200).json(court);
   } catch (err) {
     next(err);
   }

@@ -1,5 +1,5 @@
 import { prisma } from "../../../../db.js";
-import type { CourtRepository, NewCourtData, CourtAvailability } from "../../domain/ports/CourtRepository.js";
+import type { CourtRepository, NewCourtData, UpdateCourtData, CourtAvailability } from "../../domain/ports/CourtRepository.js";
 import type { Court } from "../../domain/model/Court.js";
 
 function toCourt(row: any): Court {
@@ -18,8 +18,18 @@ export class PrismaCourtRepository implements CourtRepository {
     return toCourt(row);
   }
 
+  async update(courtId: number, data: UpdateCourtData): Promise<Court> {
+    const row = await prisma.court.update({ where: { id: courtId }, data });
+    return toCourt(row);
+  }
+
   async updatePrice(courtId: number, pricePerHour: number): Promise<Court> {
     const row = await prisma.court.update({ where: { id: courtId }, data: { pricePerHour } });
+    return toCourt(row);
+  }
+
+  async deactivate(courtId: number): Promise<Court> {
+    const row = await prisma.court.update({ where: { id: courtId }, data: { enabled: false } });
     return toCourt(row);
   }
 

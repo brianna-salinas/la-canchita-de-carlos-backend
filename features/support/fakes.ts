@@ -1,7 +1,7 @@
 
 import type { BookingRepository, NewBookingData, SearchFilters, BookingWithRelations } from "../../src/contexts/bookings/domain/ports/BookingRepository.js";
 import type { Booking, TimeRange } from "../../src/contexts/bookings/domain/model/Booking.js";
-import type { CourtRepository, CourtAvailability } from "../../src/contexts/bookings/domain/ports/CourtRepository.js";
+import type { CourtRepository, CourtAvailability, UpdateCourtData } from "../../src/contexts/bookings/domain/ports/CourtRepository.js";
 import type { Court } from "../../src/contexts/bookings/domain/model/Court.js";
 import type { ScheduleBlockRepository } from "../../src/contexts/bookings/domain/ports/ScheduleBlockRepository.js";
 import type { ScheduleBlock } from "../../src/contexts/bookings/domain/model/ScheduleBlock.js";
@@ -118,7 +118,17 @@ export class FakeCourtRepository implements CourtRepository {
   private nextId = 1;
 
   addCourt(name: string, pricePerHour: number): Court {
-    const court: Court = { id: this.nextId++, name, sport: "Futbol", surface: null, pricePerHour, photoUrl: null };
+    const court: Court = {
+      id: this.nextId++,
+      name,
+      sport: "Futbol",
+      surface: null,
+      pricePerHour,
+      photoUrl: null,
+      status: "ACTIVE",
+      enabled: true,
+      description: null,
+    };
     this.courts.set(court.id, court);
     return court;
   }
@@ -131,9 +141,21 @@ export class FakeCourtRepository implements CourtRepository {
     return this.addCourt(data.name, data.pricePerHour);
   }
 
+  async update(courtId: number, data: UpdateCourtData): Promise<Court> {
+    const c = this.courts.get(courtId)!;
+    Object.assign(c, data);
+    return c;
+  }
+
   async updatePrice(courtId: number, pricePerHour: number): Promise<Court> {
     const c = this.courts.get(courtId)!;
     c.pricePerHour = pricePerHour;
+    return c;
+  }
+
+  async deactivate(courtId: number): Promise<Court> {
+    const c = this.courts.get(courtId)!;
+    c.enabled = false;
     return c;
   }
 
@@ -359,6 +381,12 @@ export class FakeUserRepository implements UserRepository {
     return u;
   }
 
+  async deactivate(userId: number): Promise<User> {
+    const u = this.users.get(userId)!;
+    u.status = "INACTIVE";
+    return u;
+  }
+
   async updateLastAccess(userId: number): Promise<void> {
     const u = this.users.get(userId);
     if (u) u.lastAccess = new Date();
@@ -373,6 +401,12 @@ export class FakeUserRepository implements UserRepository {
   async updatePasswordHash(userId: number, passwordHash: string): Promise<void> {
     const u = this.users.get(userId);
     if (u) u.passwordHash = passwordHash;
+  }
+
+  async updateProfile(userId: number, data: { name?: string; username?: string }): Promise<User> {
+    const u = this.users.get(userId)!;
+    Object.assign(u, data);
+    return u;
   }
 
   async listActiveAdmins() {
