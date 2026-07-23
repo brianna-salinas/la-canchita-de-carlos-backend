@@ -3,7 +3,8 @@ import type { CourtRepository } from "../domain/ports/CourtRepository.js";
 import type { AdminDirectory } from "../domain/ports/AdminDirectory.js";
 import type { NotificationSender } from "../../notifications/application/ports/NotificationSender.js";
 import type { NotificationRepository } from "../../notifications/domain/ports/NotificationRepository.js";
-import { assertValidRange, hasConflict } from "../domain/model/Booking.js";
+import { assertValidRange, assertNotInPast, assertWithinOperatingHours, hasConflict } from "../domain/model/Booking.js";
+import { assertCourtAvailableForBooking } from "../domain/model/Court.js";
 import { assertNonEmpty, assertPositiveAmount, normalizeText } from "../../../platform/validation/validators.js";
 import { HttpError } from "../../../platform/errors/HttpError.js";
 
@@ -37,8 +38,15 @@ export function makeRegisterBooking(deps: {
     const startTime = new Date(`1970-01-01T${input.startTime}:00Z`);
     const endTime = new Date(`1970-01-01T${input.endTime}:00Z`);
 
+    // Se busca la cancha antes de validar (y no solo despues, para las
+    // notificaciones) para poder revisar su horario de atencion.
+    const court = await deps.courts.findByIdOrThrow(input.courtId);
+
     try {
       assertValidRange({ startTime, endTime });
+      assertNotInPast(date, startTime);
+      assertCourtAvailableForBooking(court);
+      assertWithinOperatingHours(court.openTime, court.closeTime, { startTime, endTime });
       assertNonEmpty(input.customerName, "El nombre del cliente");
       assertPositiveAmount(input.totalAmount, "El monto total");
     } catch (e) {
@@ -77,7 +85,7 @@ export function makeRegisterBooking(deps: {
     });
 
     // RF23/RF24 — las notificaciones corren fuera de la transaccion y nunca revierten el alquiler.
-    const court = await deps.courts.findByIdOrThrow(input.courtId);
+    // (la cancha ya se obtuvo mas arriba, antes de validar el horario)
 
     if (input.customerEmail) {
       void deps.notifier.sendBookingConfirmation({

@@ -1,11 +1,6 @@
-import type { CourtRepository } from "../domain/ports/CourtRepository.js";
-
-// "Eliminar" una cancha en el negocio es en realidad un soft-delete
-// (enabled=false): no se borra la fila porque tiene reservas y
-// bloqueos de mantenimiento ligados por FK (historial de auditoria).
-export function makeDeactivateCourt(deps: { courts: CourtRepository }) {
-  return async function deactivateCourt(courtId: number) {
-    await deps.courts.findByIdOrThrow(courtId);
-    return deps.courts.deactivate(courtId);
-  };
-}
+// DEPRECADO: "eliminar cancha" dejo de ser un soft-delete (enabled=false) y
+// pasó a ser un borrado real e irreversible. Ver deleteCourt.usecase.ts.
+// Este archivo no se puede borrar del repo desde esta sesión (el sandbox no
+// permite eliminar archivos en las carpetas conectadas), así que se deja
+// vacío de lógica a propósito: no se importa desde ningún lado.
+export {};

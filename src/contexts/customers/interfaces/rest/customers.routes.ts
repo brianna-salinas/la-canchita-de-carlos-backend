@@ -9,6 +9,7 @@ import { makeDeactivateCustomer } from "../../application/deactivateCustomer.use
 import { makeGetCustomerHistory } from "../../application/getCustomerHistory.usecase.js";
 import { makeListCustomers } from "../../application/listCustomers.usecase.js";
 import { makeUploadCustomerPhoto } from "../../application/uploadCustomerPhoto.usecase.js";
+import { withSignedPhotoUrl, withSignedPhotoUrls } from "../../../../platform/storage/photoUrl.helper.js";
 
 const upload = multer({ storage: multer.memoryStorage() });
 const storage = new SupabaseFileStorage();
@@ -27,7 +28,7 @@ customersRouter.use(requireAuth);
 customersRouter.get("/", async (req, res, next) => {
   try {
     const customers = await listCustomers(req.query.search as string | undefined);
-    res.status(200).json(customers);
+    res.status(200).json(await withSignedPhotoUrls(storage, customers));
   } catch (err) {
     next(err);
   }
@@ -37,7 +38,7 @@ customersRouter.get("/", async (req, res, next) => {
 customersRouter.post("/", async (req, res, next) => {
   try {
     const customer = await registerCustomer(req.body);
-    res.status(201).json(customer);
+    res.status(201).json(await withSignedPhotoUrl(storage, customer));
   } catch (err) {
     next(err);
   }
@@ -47,7 +48,7 @@ customersRouter.post("/", async (req, res, next) => {
 customersRouter.patch("/:id", async (req, res, next) => {
   try {
     const customer = await updateCustomer(Number(req.params.id), req.body);
-    res.status(200).json(customer);
+    res.status(200).json(await withSignedPhotoUrl(storage, customer));
   } catch (err) {
     next(err);
   }
@@ -80,7 +81,7 @@ customersRouter.post("/:id/foto", upload.single("foto"), async (req, res, next) 
       return res.status(400).json({ error: "No se envio ninguna imagen." });
     }
     const customer = await uploadCustomerPhoto(Number(req.params.id), req.file);
-    res.status(200).json(customer);
+    res.status(200).json(await withSignedPhotoUrl(storage, customer));
   } catch (err) {
     next(err);
   }

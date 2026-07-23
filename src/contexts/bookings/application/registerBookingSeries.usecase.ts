@@ -4,7 +4,8 @@ import type { CourtRepository } from "../domain/ports/CourtRepository.js";
 import type { AdminDirectory } from "../domain/ports/AdminDirectory.js";
 import type { NotificationSender } from "../../notifications/application/ports/NotificationSender.js";
 import type { NotificationRepository } from "../../notifications/domain/ports/NotificationRepository.js";
-import { assertValidRange, hasConflict } from "../domain/model/Booking.js";
+import { assertValidRange, assertNotInPast, assertWithinOperatingHours, hasConflict } from "../domain/model/Booking.js";
+import { assertCourtAvailableForBooking } from "../domain/model/Court.js";
 import { assertNonEmpty, assertPositiveAmount, normalizeText } from "../../../platform/validation/validators.js";
 import { HttpError } from "../../../platform/errors/HttpError.js";
 
@@ -44,8 +45,15 @@ export function makeRegisterBookingSeries(deps: {
 
     const startTime = new Date(`1970-01-01T${input.startTime}:00Z`);
     const endTime = new Date(`1970-01-01T${input.endTime}:00Z`);
+
+    // Se busca la cancha antes de validar (y no solo despues, para las
+    // notificaciones) para poder revisar su horario de atencion.
+    const court = await deps.courts.findByIdOrThrow(input.courtId);
+
     try {
       assertValidRange({ startTime, endTime });
+      assertCourtAvailableForBooking(court);
+      assertWithinOperatingHours(court.openTime, court.closeTime, { startTime, endTime });
       assertNonEmpty(input.customerName, "El nombre del cliente");
       assertPositiveAmount(input.totalAmount, "El monto total");
     } catch (e) {
@@ -69,6 +77,12 @@ export function makeRegisterBookingSeries(deps: {
       for (let i = 0; i < input.dates.length; i++) {
         const dateStr = input.dates[i]!;
         const date = new Date(dateStr);
+
+        try {
+          assertNotInPast(date, startTime);
+        } catch (e) {
+          throw new HttpError(400, `${(e as Error).message} (${dateStr})`);
+        }
 
         const candidates = await tx.findActiveOverlapCandidates(input.courtId, date);
         if (hasConflict({ startTime, endTime }, candidates)) {
@@ -102,7 +116,7 @@ export function makeRegisterBookingSeries(deps: {
     });
 
     // RF23/RF24 — una sola notificacion resumen para toda la serie, fuera de la transaccion.
-    const court = await deps.courts.findByIdOrThrow(input.courtId);
+    // (la cancha ya se obtuvo mas arriba, antes de validar el horario)
     const dateLabel = `${input.dates[0]} (+${total - 1} fecha(s) mas)`;
 
     if (input.customerEmail) {

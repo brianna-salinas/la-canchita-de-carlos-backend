@@ -1,5 +1,5 @@
 import type { CourtRepository } from "../domain/ports/CourtRepository.js";
-import { assertValidPrice } from "../domain/model/Court.js";
+import { assertValidPrice, assertValidOperatingHours } from "../domain/model/Court.js";
 import { assertNonEmpty, assertMaxLength, normalizeText } from "../../../platform/validation/validators.js";
 import { HttpError } from "../../../platform/errors/HttpError.js";
 
@@ -8,16 +8,29 @@ export interface RegisterCourtInput {
   sport: string;
   surface?: string;
   pricePerHour: number;
+  openTime?: string;
+  closeTime?: string;
 }
 
-// US11 — registrar una cancha nueva (nombre unico dentro del negocio).
+// US11 — registrar una cancha nueva (nombre unico dentro del negocio). El
+// horario de atencion es opcional: si el usuario no lo configura, la cancha
+// queda disponible las 24 horas (sin restriccion de franja horaria).
 export function makeRegisterCourt(deps: { courts: CourtRepository }) {
   return async function registerCourt(input: RegisterCourtInput) {
+    const openTime = input.openTime || null;
+    const closeTime = input.closeTime || null;
+
     try {
       assertNonEmpty(input.name, "El nombre de la cancha");
       assertMaxLength(input.name, 100, "El nombre de la cancha");
       assertNonEmpty(input.sport, "El deporte");
       assertValidPrice(input.pricePerHour);
+      if (openTime || closeTime) {
+        if (!openTime || !closeTime) {
+          throw new Error("Debes indicar tanto la hora de apertura como la de cierre, o dejar ambas vacías.");
+        }
+        assertValidOperatingHours(openTime, closeTime);
+      }
     } catch (e) {
       throw new HttpError(400, (e as Error).message);
     }
@@ -28,6 +41,12 @@ export function makeRegisterCourt(deps: { courts: CourtRepository }) {
       throw new HttpError(409, "Ya existe una cancha con ese nombre.");
     }
 
-    return deps.courts.create({ ...input, name, sport: normalizeText(input.sport) });
+    return deps.courts.create({
+      ...input,
+      name,
+      sport: normalizeText(input.sport),
+      openTime,
+      closeTime,
+    });
   };
 }

@@ -22,9 +22,18 @@ import { makeDeactivateOwnAccount } from "../../application/deactivateOwnAccount
 import { makeUpdateOwnProfile } from "../../application/updateOwnProfile.usecase.js";
 import { sessionRepository } from "../../infrastructure/persistence/PrismaSessionRepository.js";
 import { HttpError } from "../../../../platform/errors/HttpError.js";
+import { withSignedPhotoUrl, withSignedPhotoUrls } from "../../../../platform/storage/photoUrl.helper.js";
 
 const upload = multer({ storage: multer.memoryStorage() });
 const storage = new SupabaseFileStorage();
+
+// El repositorio devuelve la entidad User completa (incluye passwordHash);
+// nunca debe salir tal cual por la API. Antes /:id/foto ya lo devolvia
+// completo por error; se corrige aca de paso.
+function sinPasswordHash<T extends { passwordHash?: string }>(user: T): Omit<T, "passwordHash"> {
+  const { passwordHash: _passwordHash, ...safe } = user;
+  return safe;
+}
 
 const requestAdminRegistration = makeRequestAdminRegistration({
   users: userRepository,
@@ -118,7 +127,22 @@ usersRouter.patch("/:id/promover-dueno", requireOwner, async (req, res, next) =>
 usersRouter.get("/", async (_req, res, next) => {
   try {
     const admins = await listActiveAdmins();
-    res.status(200).json(admins);
+    res.status(200).json(await withSignedPhotoUrls(storage, admins));
+  } catch (err) {
+    next(err);
+  }
+});
+
+// GET /users/me — datos del usuario autenticado con signed URL fresca de su
+// foto de perfil. Antes el frontend solo obtenia la foto una vez (en el login
+// o al subirla) y la guardaba en localStorage; como la signed URL expira a la
+// hora, la foto "desaparecia solita" del navbar aunque siguiera en el bucket.
+// El frontend llama este endpoint periodicamente para renovarla antes de que
+// venza.
+usersRouter.get("/me", async (req, res, next) => {
+  try {
+    const me = await userRepository.findByIdOrThrow(req.user!.userId);
+    res.status(200).json(await withSignedPhotoUrl(storage, sinPasswordHash(me)));
   } catch (err) {
     next(err);
   }
@@ -187,7 +211,7 @@ usersRouter.post("/:id/foto", upload.single("foto"), async (req, res, next) => {
       return res.status(400).json({ error: "No se envio ninguna imagen." });
     }
     const user = await uploadUserPhoto(targetId, req.file);
-    res.status(200).json(user);
+    res.status(200).json(await withSignedPhotoUrl(storage, sinPasswordHash(user)));
   } catch (err) {
     next(err);
   }

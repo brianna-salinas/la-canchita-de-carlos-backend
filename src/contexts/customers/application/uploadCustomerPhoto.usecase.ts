@@ -13,6 +13,8 @@ export function makeUploadCustomerPhoto(deps: { customers: CustomerRepository; s
       mimeType: file.mimetype,
       originalName: file.originalname,
     });
-    return deps.customers.updatePhoto(customerId, result.url!);
+    // El bucket es privado: se guarda la ruta, no una URL (se convierte a
+    // signed URL al leer, ver platform/storage/photoUrl.helper.ts).
+    return deps.customers.updatePhoto(customerId, result.path);
   };
 }

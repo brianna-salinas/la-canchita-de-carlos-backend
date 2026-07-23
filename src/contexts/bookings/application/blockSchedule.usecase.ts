@@ -1,7 +1,7 @@
 import type { ScheduleBlockRepository } from "../domain/ports/ScheduleBlockRepository.js";
 import type { BookingRepository } from "../domain/ports/BookingRepository.js";
 import { assertValidBlockRange, hourlySlots } from "../domain/model/ScheduleBlock.js";
-import { hasConflict } from "../domain/model/Booking.js";
+import { hasConflict, assertNotInPast } from "../domain/model/Booking.js";
 import { HttpError } from "../../../platform/errors/HttpError.js";
 
 export interface BlockScheduleInput {
@@ -23,6 +23,10 @@ export function makeBlockSchedule(deps: { scheduleBlocks: ScheduleBlockRepositor
 
     try {
       assertValidBlockRange(startTime, endTime);
+      // Antes se podia bloquear por "mantenimiento" una franja que ya paso
+      // (ej. bloquear 11-13h estando ya a las 14h); no tiene sentido y
+      // ademas era inconsistente con las reservas, que si validan esto.
+      assertNotInPast(date, startTime);
     } catch (e) {
       throw new HttpError(400, (e as Error).message);
     }

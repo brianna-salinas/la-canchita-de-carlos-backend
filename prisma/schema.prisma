@@ -170,6 +170,8 @@ model Court {
   enabled      Boolean     @default(true) @map("cou_enabled")
   photoUrl     String?     @map("cou_photo_url")
   description  String?     @map("cou_description")
+  openTime     String?     @map("cou_open_time") @db.VarChar(5)
+  closeTime    String?     @map("cou_close_time") @db.VarChar(5)
   createdAt    DateTime    @default(now()) @map("cou_created_at") @db.Timestamptz()
   updatedAt    DateTime    @default(now()) @updatedAt @map("cou_updated_at") @db.Timestamptz()
 
@@ -187,7 +189,7 @@ model ScheduleBlock {
   reason    String?  @map("blo_reason") @db.VarChar(200)
   createdAt DateTime @default(now()) @map("blo_created_at") @db.Timestamptz()
 
-  court Court @relation(fields: [courtId], references: [id])
+  court Court @relation(fields: [courtId], references: [id], onDelete: Cascade)
 
   @@map("schedule_blocks")
 }
@@ -214,7 +216,7 @@ model Payment {
   method    String   @map("pay_method") @db.VarChar(30)
   createdAt DateTime @default(now()) @map("pay_created_at") @db.Timestamptz()
 
-  booking Booking @relation(fields: [bookingId], references: [id])
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
 
   @@map("payments")
 }
@@ -242,7 +244,7 @@ model Booking {
   createdAt         DateTime           @default(now()) @map("boo_created_at") @db.Timestamptz()
   updatedAt         DateTime           @default(now()) @updatedAt @map("boo_updated_at") @db.Timestamptz()
 
-  court    Court     @relation(fields: [courtId], references: [id])
+  court    Court     @relation(fields: [courtId], references: [id], onDelete: Cascade)
   customer Customer? @relation(fields: [customerId], references: [id])
   payments Payment[]
 

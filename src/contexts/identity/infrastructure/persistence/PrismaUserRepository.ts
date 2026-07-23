@@ -53,9 +53,12 @@ export class PrismaUserRepository implements UserRepository {
   }
 
   async listActiveAdmins() {
+    // Antes no se seleccionaba photoUrl (se pensaba como "listado liviano"),
+    // asi que ningun administrador mostraba su foto en la lista de
+    // Administracion/Solicitudes de Acceso, aunque la tuviera subida.
     return prisma.user.findMany({
       where: { status: "ACTIVE" },
-      select: { id: true, name: true, email: true, isOwner: true, lastAccess: true },
+      select: { id: true, name: true, email: true, isOwner: true, lastAccess: true, photoUrl: true },
       orderBy: { name: "asc" },
     });
   }

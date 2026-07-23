@@ -14,6 +14,8 @@ export function makeAddCourtPhoto(deps: { courts: CourtRepository; storage: File
       originalName: file.originalname,
     });
 
-    return deps.courts.updatePhoto(courtId, result.url!);
+    // El bucket es privado: se guarda la ruta, no una URL (se convierte a
+    // signed URL al leer, ver platform/storage/photoUrl.helper.ts).
+    return deps.courts.updatePhoto(courtId, result.path);
   };
 }

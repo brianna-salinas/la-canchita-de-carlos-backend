@@ -40,13 +40,10 @@ export class SupabaseFileStorage implements FileStorage {
       throw new HttpError(500, `No se pudo subir la imagen: ${error.message}`);
     }
 
-    if (folder === "comprobantes") {
-      // Carpeta privada: no se expone URL publica al subir, solo la ruta interna.
-      return { path, url: null };
-    }
-
-    const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
-    return { path, url: data.publicUrl };
+    // El bucket es privado (para poder ocultar los comprobantes de pago),
+    // asi que ninguna carpeta tiene URL publica fija: se devuelve solo la
+    // ruta, y quien la necesite pide un signed URL con createSignedUrl().
+    return { path, url: null };
   }
 
   async createSignedUrl(path: string, expiresInSeconds: number): Promise<string> {

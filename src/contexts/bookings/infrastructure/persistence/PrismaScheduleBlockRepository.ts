@@ -12,6 +12,13 @@ export class PrismaScheduleBlockRepository implements ScheduleBlockRepository {
     return prisma.scheduleBlock.findMany({ where: { courtId, date }, orderBy: { time: "asc" } });
   }
 
+  async listUpcomingForCourt(courtId: number, fromDate: Date): Promise<ScheduleBlock[]> {
+    return prisma.scheduleBlock.findMany({
+      where: { courtId, date: { gte: fromDate } },
+      orderBy: [{ date: "asc" }, { time: "asc" }],
+    });
+  }
+
   async deleteById(blockId: number): Promise<void> {
     await prisma.scheduleBlock.delete({ where: { id: blockId } });
   }

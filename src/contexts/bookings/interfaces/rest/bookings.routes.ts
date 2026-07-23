@@ -20,7 +20,7 @@ const registerBooking = makeRegisterBooking({
   admins: adminDirectory,
   notifications: notificationRepository,
 });
-const editBooking = makeEditBooking({ bookings: bookingRepository });
+const editBooking = makeEditBooking({ bookings: bookingRepository, courts: courtRepository });
 const cancelBooking = makeCancelBooking({ bookings: bookingRepository });
 const searchBookings = makeSearchBookings({ bookings: bookingRepository });
 const registerBookingSeries = makeRegisterBookingSeries({

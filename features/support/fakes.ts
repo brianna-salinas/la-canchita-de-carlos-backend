@@ -128,6 +128,8 @@ export class FakeCourtRepository implements CourtRepository {
       status: "ACTIVE",
       enabled: true,
       description: null,
+      openTime: "08:00",
+      closeTime: "22:00",
     };
     this.courts.set(court.id, court);
     return court;
@@ -137,8 +139,18 @@ export class FakeCourtRepository implements CourtRepository {
     return [...this.courts.values()].find((c) => c.name === name) ?? null;
   }
 
-  async create(data: { name: string; sport: string; surface?: string; pricePerHour: number }): Promise<Court> {
-    return this.addCourt(data.name, data.pricePerHour);
+  async create(data: {
+    name: string;
+    sport: string;
+    surface?: string;
+    pricePerHour: number;
+    openTime?: string | null;
+    closeTime?: string | null;
+  }): Promise<Court> {
+    const court = this.addCourt(data.name, data.pricePerHour);
+    court.openTime = data.openTime ?? null;
+    court.closeTime = data.closeTime ?? null;
+    return court;
   }
 
   async update(courtId: number, data: UpdateCourtData): Promise<Court> {
@@ -153,10 +165,12 @@ export class FakeCourtRepository implements CourtRepository {
     return c;
   }
 
-  async deactivate(courtId: number): Promise<Court> {
-    const c = this.courts.get(courtId)!;
-    c.enabled = false;
-    return c;
+  async delete(courtId: number): Promise<void> {
+    this.courts.delete(courtId);
+  }
+
+  async listAll(): Promise<Court[]> {
+    return [...this.courts.values()];
   }
 
   async updatePhoto(courtId: number, photoUrl: string): Promise<Court> {
@@ -188,6 +202,10 @@ export class FakeScheduleBlockRepository implements ScheduleBlockRepository {
 
   async listForCourtAndDate(courtId: number, date: Date): Promise<ScheduleBlock[]> {
     return this.blocks.filter((b) => b.courtId === courtId && dateKey(b.date) === dateKey(date));
+  }
+
+  async listUpcomingForCourt(courtId: number, fromDate: Date): Promise<ScheduleBlock[]> {
+    return this.blocks.filter((b) => b.courtId === courtId && b.date.getTime() >= fromDate.getTime());
   }
 
   async deleteById(blockId: number): Promise<void> {
@@ -321,8 +339,7 @@ export class FakeFileStorage implements FileStorage {
   async upload(input: UploadFileInput): Promise<UploadResult> {
     const path = `${input.folder}/fake-${this.files.size + 1}.jpg`;
     this.files.set(path, input.buffer);
-    if (input.folder === "comprobantes") return { path, url: null };
-    return { path, url: `https://fake.storage/${path}` };
+    return { path, url: null };
   }
 
   async createSignedUrl(path: string, expiresInSeconds: number): Promise<string> {

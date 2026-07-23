@@ -1,5 +1,6 @@
 import type { CourtRepository, UpdateCourtData } from "../domain/ports/CourtRepository.js";
 import { assertNonEmpty, assertMaxLength, normalizeText } from "../../../platform/validation/validators.js";
+import { assertValidOperatingHours } from "../domain/model/Court.js";
 import { HttpError } from "../../../platform/errors/HttpError.js";
 
 export interface UpdateCourtInput {
@@ -8,14 +9,21 @@ export interface UpdateCourtInput {
   surface?: string;
   description?: string;
   status?: "ACTIVE" | "MAINTENANCE";
+  // string = nuevo valor, null = quitar el horario (queda sin restriccion),
+  // undefined = no tocar el valor actual.
+  openTime?: string | null;
+  closeTime?: string | null;
+  // Pausar (false) o reanudar (true) la cancha sin borrarla.
+  enabled?: boolean;
 }
 
 // US26-US30 — edita los datos generales de una cancha ya creada
-// (nombre, deporte, superficie, descripcion, estado operativo). El
-// precio y la foto tienen su propio endpoint dedicado (updateCourtPrice
-// / addCourtPhoto) porque ya existian antes de esto.
+// (nombre, deporte, superficie, descripcion, estado operativo, horario
+// de atencion). El precio y la foto tienen su propio endpoint dedicado
+// (updateCourtPrice / addCourtPhoto) porque ya existian antes de esto.
 export function makeUpdateCourt(deps: { courts: CourtRepository }) {
   return async function updateCourt(courtId: number, input: UpdateCourtInput) {
+    const actual = await deps.courts.findByIdOrThrow(courtId);
     const data: UpdateCourtData = {};
 
     try {
@@ -28,6 +36,19 @@ export function makeUpdateCourt(deps: { courts: CourtRepository }) {
         assertNonEmpty(input.sport, "El deporte");
         data.sport = normalizeText(input.sport);
       }
+
+      if (input.openTime !== undefined || input.closeTime !== undefined) {
+        const openTime = (input.openTime !== undefined ? input.openTime : actual.openTime) || null;
+        const closeTime = (input.closeTime !== undefined ? input.closeTime : actual.closeTime) || null;
+        if (openTime || closeTime) {
+          if (!openTime || !closeTime) {
+            throw new Error("Debes indicar tanto la hora de apertura como la de cierre, o dejar ambas vacías.");
+          }
+          assertValidOperatingHours(openTime, closeTime);
+        }
+        data.openTime = openTime;
+        data.closeTime = closeTime;
+      }
     } catch (e) {
       throw new HttpError(400, (e as Error).message);
     }
@@ -35,8 +56,8 @@ export function makeUpdateCourt(deps: { courts: CourtRepository }) {
     if (input.surface !== undefined) data.surface = input.surface;
     if (input.description !== undefined) data.description = input.description;
     if (input.status !== undefined) data.status = input.status;
+    if (input.enabled !== undefined) data.enabled = input.enabled;
 
-    await deps.courts.findByIdOrThrow(courtId);
     return deps.courts.update(courtId, data);
   };
 }

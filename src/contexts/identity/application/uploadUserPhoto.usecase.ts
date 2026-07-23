@@ -13,6 +13,8 @@ export function makeUploadUserPhoto(deps: { users: UserRepository; storage: File
       mimeType: file.mimetype,
       originalName: file.originalname,
     });
-    return deps.users.updatePhoto(userId, result.url!);
+    // El bucket es privado: se guarda la ruta, no una URL (se convierte a
+    // signed URL al leer, ver platform/storage/photoUrl.helper.ts).
+    return deps.users.updatePhoto(userId, result.path);
   };
 }

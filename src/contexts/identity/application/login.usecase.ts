@@ -48,7 +48,17 @@ export function makeLogin(deps: { users: UserRepository; sessions: SessionReposi
 
     return {
       accessToken,
-      user: { id: user.id, name: user.name, email: user.email, isOwner: user.isOwner },
+      // photoUrl se incluye aca como el path guardado en DB; se resuelve a
+      // signed URL en la capa de rutas (auth.routes.ts), igual que en el
+      // resto de endpoints que devuelven fotos (ver photoUrl.helper.ts).
+      user: {
+        id: user.id,
+        name: user.name,
+        username: user.username,
+        email: user.email,
+        isOwner: user.isOwner,
+        photoUrl: user.photoUrl ?? null,
+      },
     };
   };
 }

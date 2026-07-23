@@ -1,4 +1,4 @@
-import type { Booking, BookingStatus, TimeRange } from "../model/Booking.js";
+import type { Booking, BookingStatus, PaymentStatus, TimeRange } from "../model/Booking.js";
 
 export interface NewBookingData {
   courtId: number;
@@ -9,6 +9,12 @@ export interface NewBookingData {
   startTime: Date;
   endTime: Date;
   totalAmount: number;
+  // Correccion directa de pago desde editBooking.usecase.ts (distinta del
+  // flujo normal de "agregar un pago" en Payments, que solo suma). Permite
+  // al administrador corregir un monto/estado mal registrado, incluso
+  // bajandolo (ej. de PAID a PARTIAL).
+  paidAmount?: number;
+  paymentStatus?: PaymentStatus;
   // Reservas multidia/recurrentes (US28/frontend): opcionales, solo se completan cuando
   // el Booking pertenece a una serie generada por registerBookingSeries.usecase.ts.
   bookingType?: "SINGLE" | "MULTIDAY" | "RECURRING";
