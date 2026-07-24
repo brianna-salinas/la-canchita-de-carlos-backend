@@ -1,1 +1,0 @@
-{"version":3,"file":"markNotificationRead.usecase.js","sourceRoot":"","sources":["markNotificationRead.usecase.ts"],"names":[],"mappings":"AAEA,MAAM,UAAU,wBAAwB,CAAC,IAA+C;IACtF,OAAO,SAAS,oBAAoB,CAAC,cAAsB;QACzD,OAAO,IAAI,CAAC,aAAa,CAAC,QAAQ,CAAC,cAAc,CAAC,CAAC;IACrD,CAAC,CAAC;AACJ,CAAC"}

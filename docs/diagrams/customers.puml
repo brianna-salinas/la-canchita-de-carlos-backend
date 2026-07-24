@@ -57,7 +57,7 @@ package "infrastructure.persistence" {
   PrismaCustomerRepository ..|> CustomerRepository
 }
 
-package "application (casos de uso)" {
+package "application" {
   class registerCustomer << (F,orchid) factory >>
   class updateCustomer << (F,orchid) factory >>
   class deactivateCustomer << (F,orchid) factory >>

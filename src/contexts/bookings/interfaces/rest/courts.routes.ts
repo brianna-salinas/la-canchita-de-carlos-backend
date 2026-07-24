@@ -1,7 +1,7 @@
 import { Router } from "express";
 import multer from "multer";
 import { requireAuth } from "../../../../platform/middlewares/auth.middleware.js";
-import { courtRepository } from "../../infrastructure/persistence/PrismaCourtRepository.js";
+import { courtRepository } from "../../infrastructure/persistence/repositories/PrismaCourtRepository.js";
 import { SupabaseFileStorage } from "../../../../platform/storage/SupabaseFileStorage.js";
 import { makeRegisterCourt } from "../../application/registerCourt.usecase.js";
 import { makeUpdateCourt } from "../../application/updateCourt.usecase.js";
@@ -15,10 +15,10 @@ import { makeBlockScheduleSeries } from "../../application/blockScheduleSeries.u
 import { makeListScheduleBlocks } from "../../application/listScheduleBlocks.usecase.js";
 import { makeListUpcomingScheduleBlocks } from "../../application/listUpcomingScheduleBlocks.usecase.js";
 import { makeUnblockSchedule } from "../../application/unblockSchedule.usecase.js";
-import { scheduleBlockRepository } from "../../infrastructure/persistence/PrismaScheduleBlockRepository.js";
-import { bookingRepository } from "../../infrastructure/persistence/PrismaBookingRepository.js";
-import { adminDirectory } from "../../infrastructure/persistence/PrismaAdminDirectory.js";
-import { notificationRepository } from "../../../notifications/infrastructure/persistence/PrismaNotificationRepository.js";
+import { scheduleBlockRepository } from "../../infrastructure/persistence/repositories/PrismaScheduleBlockRepository.js";
+import { bookingRepository } from "../../infrastructure/persistence/repositories/PrismaBookingRepository.js";
+import { adminDirectory } from "../../infrastructure/persistence/repositories/PrismaAdminDirectory.js";
+import { notificationRepository } from "../../../notifications/infrastructure/persistence/repositories/PrismaNotificationRepository.js";
 import { withSignedPhotoUrl, withSignedPhotoUrls } from "../../../../platform/storage/photoUrl.helper.js";
 
 const upload = multer({ storage: multer.memoryStorage() });

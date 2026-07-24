@@ -1,1 +1,0 @@
-{"version":3,"file":"getConsolidatedAvailability.usecase.js","sourceRoot":"","sources":["getConsolidatedAvailability.usecase.ts"],"names":[],"mappings":"AAEA,yEAAyE;AACzE,MAAM,UAAU,+BAA+B,CAAC,IAAiC;IAC/E,OAAO,SAAS,2BAA2B,CAAC,IAAY;QACtD,OAAO,IAAI,CAAC,MAAM,CAAC,2BAA2B,CAAC,IAAI,IAAI,CAAC,IAAI,CAAC,CAAC,CAAC;IACjE,CAAC,CAAC;AACJ,CAAC"}

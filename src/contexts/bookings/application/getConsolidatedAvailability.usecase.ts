@@ -1,4 +1,4 @@
-import type { CourtRepository } from "../domain/ports/CourtRepository.js";
+import type { CourtRepository } from "../domain/model/ports/CourtRepository.js";
 
 // US13 — disponibilidad consolidada de todas las canchas para una fecha.
 export function makeGetConsolidatedAvailability(deps: { courts: CourtRepository }) {

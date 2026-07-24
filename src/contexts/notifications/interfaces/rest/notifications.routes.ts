@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { requireAuth } from "../../../../platform/middlewares/auth.middleware.js";
-import { notificationRepository } from "../../infrastructure/persistence/PrismaNotificationRepository.js";
+import { notificationRepository } from "../../infrastructure/persistence/repositories/PrismaNotificationRepository.js";
 import { makeListMyNotifications } from "../../application/listMyNotifications.usecase.js";
 import { makeMarkNotificationRead } from "../../application/markNotificationRead.usecase.js";
 

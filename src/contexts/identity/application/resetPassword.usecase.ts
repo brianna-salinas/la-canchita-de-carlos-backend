@@ -1,5 +1,5 @@
-import type { PasswordResetTokenRepository } from "../domain/ports/PasswordResetTokenRepository.js";
-import type { SessionRepository } from "../domain/ports/SessionRepository.js";
+import type { PasswordResetTokenRepository } from "../domain/model/ports/PasswordResetTokenRepository.js";
+import type { SessionRepository } from "../domain/model/ports/SessionRepository.js";
 import { hashToken } from "../../../platform/security/tokens.js";
 import { hashPassword } from "../../../platform/security/password.js";
 import { assertMinLength } from "../../../platform/validation/validators.js";

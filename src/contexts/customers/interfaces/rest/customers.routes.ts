@@ -1,7 +1,7 @@
 import { Router } from "express";
 import multer from "multer";
 import { requireAuth } from "../../../../platform/middlewares/auth.middleware.js";
-import { customerRepository } from "../../infrastructure/persistence/PrismaCustomerRepository.js";
+import { customerRepository } from "../../infrastructure/persistence/repositories/PrismaCustomerRepository.js";
 import { SupabaseFileStorage } from "../../../../platform/storage/SupabaseFileStorage.js";
 import { makeRegisterCustomer } from "../../application/registerCustomer.usecase.js";
 import { makeUpdateCustomer } from "../../application/updateCustomer.usecase.js";

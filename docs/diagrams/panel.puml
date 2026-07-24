@@ -41,7 +41,7 @@ package "infrastructure.persistence" {
   PrismaPanelRepository ..|> PanelRepository
 }
 
-package "application (casos de uso)" {
+package "application" {
   class getBookingsToday << (F,orchid) factory >>
   class getIncomeToday << (F,orchid) factory >>
   class getPendingPaymentsToday << (F,orchid) factory >>

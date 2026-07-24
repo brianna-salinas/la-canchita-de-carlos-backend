@@ -1,6 +1,6 @@
-import type { AccessRequestRepository } from "../domain/ports/AccessRequestRepository.js";
+import type { AccessRequestRepository } from "../domain/model/ports/AccessRequestRepository.js";
 import type { NotificationSender } from "../../notifications/application/ports/NotificationSender.js";
-import { assertPending } from "../domain/model/AccessRequest.js";
+import { assertPending } from "../domain/model/aggregates/AccessRequest.js";
 import { HttpError } from "../../../platform/errors/HttpError.js";
 
 // TS05 / US21 — rechazar una solicitud pendiente (solo dueno).

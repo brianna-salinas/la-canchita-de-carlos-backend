@@ -1,4 +1,4 @@
-import type { PaymentRepository } from "../domain/ports/PaymentRepository.js";
+import type { PaymentRepository } from "../domain/model/ports/PaymentRepository.js";
 import type { FileStorage } from "../../../platform/storage/ports/FileStorage.js";
 import { HttpError } from "../../../platform/errors/HttpError.js";
 

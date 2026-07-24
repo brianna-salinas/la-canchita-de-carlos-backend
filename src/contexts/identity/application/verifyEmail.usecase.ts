@@ -1,4 +1,4 @@
-import type { EmailVerificationTokenRepository } from "../domain/ports/EmailVerificationTokenRepository.js";
+import type { EmailVerificationTokenRepository } from "../domain/model/ports/EmailVerificationTokenRepository.js";
 import { hashToken } from "../../../platform/security/tokens.js";
 import { HttpError } from "../../../platform/errors/HttpError.js";
 

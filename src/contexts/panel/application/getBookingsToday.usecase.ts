@@ -1,4 +1,4 @@
-import type { PanelRepository } from "../domain/ports/PanelRepository.js";
+import type { PanelRepository } from "../domain/model/ports/PanelRepository.js";
 
 function todayRange(dateStr?: string) {
   const date = dateStr ? new Date(dateStr) : new Date();

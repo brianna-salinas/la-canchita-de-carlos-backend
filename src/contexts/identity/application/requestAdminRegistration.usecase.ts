@@ -1,5 +1,5 @@
-import type { UserRepository } from "../domain/ports/UserRepository.js";
-import type { AccessRequestRepository } from "../domain/ports/AccessRequestRepository.js";
+import type { UserRepository } from "../domain/model/ports/UserRepository.js";
+import type { AccessRequestRepository } from "../domain/model/ports/AccessRequestRepository.js";
 import type { NotificationSender } from "../../notifications/application/ports/NotificationSender.js";
 import { hashPassword } from "../../../platform/security/password.js";
 import {

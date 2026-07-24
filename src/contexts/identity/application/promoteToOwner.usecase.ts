@@ -1,4 +1,4 @@
-import type { UserRepository } from "../domain/ports/UserRepository.js";
+import type { UserRepository } from "../domain/model/ports/UserRepository.js";
 import { HttpError } from "../../../platform/errors/HttpError.js";
 
 // Owner es un rol, no un singleton: cualquier owner existente puede ascender a otro

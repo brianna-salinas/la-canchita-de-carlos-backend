@@ -1,9 +1,9 @@
 import { Router } from "express";
 import { requireAuth } from "../../../../platform/middlewares/auth.middleware.js";
-import { userRepository } from "../../infrastructure/persistence/PrismaUserRepository.js";
-import { sessionRepository } from "../../infrastructure/persistence/PrismaSessionRepository.js";
-import { passwordResetTokenRepository } from "../../infrastructure/persistence/PrismaPasswordResetTokenRepository.js";
-import { notificationSender } from "../../../notifications/infrastructure/ResendNotificationSender.js";
+import { userRepository } from "../../infrastructure/persistence/repositories/PrismaUserRepository.js";
+import { sessionRepository } from "../../infrastructure/persistence/repositories/PrismaSessionRepository.js";
+import { passwordResetTokenRepository } from "../../infrastructure/persistence/repositories/PrismaPasswordResetTokenRepository.js";
+import { notificationSender } from "../../../notifications/infrastructure/email/ResendNotificationSender.js";
 import { makeLogin } from "../../application/login.usecase.js";
 import { makeLogout } from "../../application/logout.usecase.js";
 import { makeBootstrapOwner } from "../../application/bootstrapOwner.usecase.js";

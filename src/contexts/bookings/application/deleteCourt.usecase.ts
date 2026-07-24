@@ -1,4 +1,4 @@
-import type { CourtRepository } from "../domain/ports/CourtRepository.js";
+import type { CourtRepository } from "../domain/model/ports/CourtRepository.js";
 
 // "Eliminar" una cancha es un borrado real e irreversible: se borra la
 // fila de la cancha y, en cascada a nivel de base de datos (ver migracion

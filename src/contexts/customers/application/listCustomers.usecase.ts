@@ -1,4 +1,4 @@
-import type { CustomerRepository } from "../domain/ports/CustomerRepository.js";
+import type { CustomerRepository } from "../domain/model/ports/CustomerRepository.js";
 
 // US09 — listar/buscar clientes.
 export function makeListCustomers(deps: { customers: CustomerRepository }) {

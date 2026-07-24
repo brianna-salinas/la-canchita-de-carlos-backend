@@ -1,4 +1,4 @@
-import type { CustomerRepository } from "../domain/ports/CustomerRepository.js";
+import type { CustomerRepository } from "../domain/model/ports/CustomerRepository.js";
 import type { FileStorage } from "../../../platform/storage/ports/FileStorage.js";
 
 // TS10 (analogo) — foto de un cliente. Carpeta publica "clientes".

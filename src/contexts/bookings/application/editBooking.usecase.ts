@@ -1,7 +1,7 @@
-import type { BookingRepository } from "../domain/ports/BookingRepository.js";
-import type { CourtRepository } from "../domain/ports/CourtRepository.js";
-import { assertValidRange, assertNotInPast, assertWithinOperatingHours, hasConflict, resolvePaymentStatus } from "../domain/model/Booking.js";
-import { assertCourtAvailableForBooking } from "../domain/model/Court.js";
+import type { BookingRepository } from "../domain/model/ports/BookingRepository.js";
+import type { CourtRepository } from "../domain/model/ports/CourtRepository.js";
+import { assertValidRange, assertNotInPast, assertWithinOperatingHours, hasConflict, resolvePaymentStatus } from "../domain/model/aggregates/Booking.js";
+import { assertCourtAvailableForBooking } from "../domain/model/aggregates/Court.js";
 import { HttpError } from "../../../platform/errors/HttpError.js";
 
 export interface EditBookingInput {

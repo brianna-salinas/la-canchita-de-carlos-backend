@@ -1,4 +1,4 @@
-import type { PaymentRepository } from "../domain/ports/PaymentRepository.js";
+import type { PaymentRepository } from "../domain/model/ports/PaymentRepository.js";
 import type { FileStorage } from "../../../platform/storage/ports/FileStorage.js";
 
 // TS08 — adjunta el comprobante de un pago (RF25/US27), sube la imagen a Supabase Storage.

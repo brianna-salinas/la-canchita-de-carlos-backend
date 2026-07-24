@@ -3,3 +3,16 @@ node_modules
 .env
 
 /generated/prisma
+
+# Compiled output stray next to TS source (tsx/tsc run without a separate outDir).
+# NOTE: src/platform/types/express.d.ts is hand-written (ambient Express.Request
+# augmentation), not generated — never delete/ignore it even though it matches *.d.ts.
+src/**/*.js
+src/**/*.js.map
+src/**/*.d.ts.map
+features/**/*.js
+features/**/*.js.map
+features/**/*.d.ts
+features/**/*.d.ts.map
+src/**/*.d.ts
+!src/platform/types/*.d.ts

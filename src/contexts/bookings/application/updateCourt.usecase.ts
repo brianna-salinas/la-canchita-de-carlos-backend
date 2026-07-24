@@ -1,6 +1,6 @@
-import type { CourtRepository, UpdateCourtData } from "../domain/ports/CourtRepository.js";
+import type { CourtRepository, UpdateCourtData } from "../domain/model/ports/CourtRepository.js";
 import { assertNonEmpty, assertMaxLength, normalizeText } from "../../../platform/validation/validators.js";
-import { assertValidOperatingHours } from "../domain/model/Court.js";
+import { assertValidOperatingHours } from "../domain/model/aggregates/Court.js";
 import { HttpError } from "../../../platform/errors/HttpError.js";
 
 export interface UpdateCourtInput {

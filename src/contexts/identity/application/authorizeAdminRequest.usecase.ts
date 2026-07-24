@@ -1,9 +1,9 @@
-import type { UserRepository } from "../domain/ports/UserRepository.js";
-import type { AccessRequestRepository } from "../domain/ports/AccessRequestRepository.js";
-import type { EmailVerificationTokenRepository } from "../domain/ports/EmailVerificationTokenRepository.js";
+import type { UserRepository } from "../domain/model/ports/UserRepository.js";
+import type { AccessRequestRepository } from "../domain/model/ports/AccessRequestRepository.js";
+import type { EmailVerificationTokenRepository } from "../domain/model/ports/EmailVerificationTokenRepository.js";
 import type { NotificationSender } from "../../notifications/application/ports/NotificationSender.js";
-import { assertPending } from "../domain/model/AccessRequest.js";
-import { usernameFromEmail } from "../domain/model/User.js";
+import { assertPending } from "../domain/model/aggregates/AccessRequest.js";
+import { usernameFromEmail } from "../domain/model/aggregates/User.js";
 import { generateRawToken, hashToken, tokenExpiryFromNow } from "../../../platform/security/tokens.js";
 import { HttpError } from "../../../platform/errors/HttpError.js";
 

@@ -2,10 +2,10 @@ import { Router } from "express";
 import multer from "multer";
 import { requireAuth } from "../../../../platform/middlewares/auth.middleware.js";
 import { requireOwner } from "../../../../platform/middlewares/ownerOnly.middleware.js";
-import { userRepository } from "../../infrastructure/persistence/PrismaUserRepository.js";
-import { accessRequestRepository } from "../../infrastructure/persistence/PrismaAccessRequestRepository.js";
-import { emailVerificationTokenRepository } from "../../infrastructure/persistence/PrismaEmailVerificationTokenRepository.js";
-import { notificationSender } from "../../../notifications/infrastructure/ResendNotificationSender.js";
+import { userRepository } from "../../infrastructure/persistence/repositories/PrismaUserRepository.js";
+import { accessRequestRepository } from "../../infrastructure/persistence/repositories/PrismaAccessRequestRepository.js";
+import { emailVerificationTokenRepository } from "../../infrastructure/persistence/repositories/PrismaEmailVerificationTokenRepository.js";
+import { notificationSender } from "../../../notifications/infrastructure/email/ResendNotificationSender.js";
 import { SupabaseFileStorage } from "../../../../platform/storage/SupabaseFileStorage.js";
 import { makeRequestAdminRegistration } from "../../application/requestAdminRegistration.usecase.js";
 import { makeAuthorizeAdminRequest } from "../../application/authorizeAdminRequest.usecase.js";
@@ -21,7 +21,7 @@ import { makeRemoveUserPhoto } from "../../application/removeUserPhoto.usecase.j
 import { makeDeactivateAdmin } from "../../application/deactivateAdmin.usecase.js";
 import { makeDeactivateOwnAccount } from "../../application/deactivateOwnAccount.usecase.js";
 import { makeUpdateOwnProfile } from "../../application/updateOwnProfile.usecase.js";
-import { sessionRepository } from "../../infrastructure/persistence/PrismaSessionRepository.js";
+import { sessionRepository } from "../../infrastructure/persistence/repositories/PrismaSessionRepository.js";
 import { HttpError } from "../../../../platform/errors/HttpError.js";
 import { withSignedPhotoUrl, withSignedPhotoUrls } from "../../../../platform/storage/photoUrl.helper.js";
 

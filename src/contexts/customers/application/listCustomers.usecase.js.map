@@ -1,1 +1,0 @@
-{"version":3,"file":"listCustomers.usecase.js","sourceRoot":"","sources":["listCustomers.usecase.ts"],"names":[],"mappings":"AAEA,iCAAiC;AACjC,MAAM,UAAU,iBAAiB,CAAC,IAAuC;IACvE,OAAO,SAAS,aAAa,CAAC,MAAe;QAC3C,OAAO,IAAI,CAAC,SAAS,CAAC,IAAI,CAAC,MAAM,CAAC,CAAC;IACrC,CAAC,CAAC;AACJ,CAAC"}

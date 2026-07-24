@@ -1,1 +1,0 @@
-{"version":3,"file":"deactivateCustomer.usecase.js","sourceRoot":"","sources":["deactivateCustomer.usecase.ts"],"names":[],"mappings":"AAEA,0GAA0G;AAC1G,MAAM,UAAU,sBAAsB,CAAC,IAAuC;IAC5E,OAAO,SAAS,kBAAkB,CAAC,UAAkB;QACnD,OAAO,IAAI,CAAC,SAAS,CAAC,UAAU,CAAC,UAAU,CAAC,CAAC;IAC/C,CAAC,CAAC;AACJ,CAAC"}

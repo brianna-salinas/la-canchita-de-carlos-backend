@@ -1,4 +1,4 @@
-import type { ScheduleBlockRepository } from "../domain/ports/ScheduleBlockRepository.js";
+import type { ScheduleBlockRepository } from "../domain/model/ports/ScheduleBlockRepository.js";
 
 // RF07/RF32 — lista los mantenimientos programados (desde hoy en adelante)
 // de una cancha, para poder verlos y cancelarlos desde Canchas (antes solo

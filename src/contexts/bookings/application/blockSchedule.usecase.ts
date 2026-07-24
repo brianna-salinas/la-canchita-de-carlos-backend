@@ -1,7 +1,7 @@
-import type { ScheduleBlockRepository } from "../domain/ports/ScheduleBlockRepository.js";
-import type { BookingRepository } from "../domain/ports/BookingRepository.js";
-import { assertValidBlockRange, hourlySlots } from "../domain/model/ScheduleBlock.js";
-import { hasConflict, assertNotInPast } from "../domain/model/Booking.js";
+import type { ScheduleBlockRepository } from "../domain/model/ports/ScheduleBlockRepository.js";
+import type { BookingRepository } from "../domain/model/ports/BookingRepository.js";
+import { assertValidBlockRange, hourlySlots } from "../domain/model/aggregates/ScheduleBlock.js";
+import { hasConflict, assertNotInPast } from "../domain/model/aggregates/Booking.js";
 import { HttpError } from "../../../platform/errors/HttpError.js";
 
 export interface BlockScheduleInput {

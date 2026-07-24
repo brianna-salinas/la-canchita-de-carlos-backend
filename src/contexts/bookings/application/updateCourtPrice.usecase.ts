@@ -1,5 +1,5 @@
-import type { CourtRepository } from "../domain/ports/CourtRepository.js";
-import { assertValidPrice } from "../domain/model/Court.js";
+import type { CourtRepository } from "../domain/model/ports/CourtRepository.js";
+import { assertValidPrice } from "../domain/model/aggregates/Court.js";
 import { HttpError } from "../../../platform/errors/HttpError.js";
 
 // US12 — actualizar el precio de una cancha (RF12: no puede ser negativo ni cero).

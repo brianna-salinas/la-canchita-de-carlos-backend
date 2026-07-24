@@ -1,5 +1,5 @@
-import type { UserRepository } from "../domain/ports/UserRepository.js";
-import type { PasswordResetTokenRepository } from "../domain/ports/PasswordResetTokenRepository.js";
+import type { UserRepository } from "../domain/model/ports/UserRepository.js";
+import type { PasswordResetTokenRepository } from "../domain/model/ports/PasswordResetTokenRepository.js";
 import type { NotificationSender } from "../../notifications/application/ports/NotificationSender.js";
 import { generateRawToken, hashToken, tokenExpiryFromNow } from "../../../platform/security/tokens.js";
 

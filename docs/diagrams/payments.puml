@@ -1,5 +1,5 @@
 @startuml payments-context
-title Bounded Context: Payments (soporte)
+title Bounded Context: Payments
 
 skinparam classAttributeIconSize 0
 skinparam packageStyle rectangle
@@ -59,7 +59,7 @@ package "infrastructure.persistence" {
   PrismaPaymentRepository ..|> PaymentRepository
 }
 
-package "application (casos de uso)" {
+package "application" {
   class registerPayment << (F,orchid) factory >>
   class attachReceipt << (F,orchid) factory >>
   class getReceiptSignedUrl << (F,orchid) factory >>

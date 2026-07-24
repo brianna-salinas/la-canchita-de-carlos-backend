@@ -1,4 +1,4 @@
-import type { CourtRepository } from "../domain/ports/CourtRepository.js";
+import type { CourtRepository } from "../domain/model/ports/CourtRepository.js";
 
 // Listado completo de canchas para la pantalla de administracion (Canchas):
 // a diferencia de getConsolidatedAvailability.usecase.ts (que solo trae las

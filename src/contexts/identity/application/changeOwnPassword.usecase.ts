@@ -1,5 +1,5 @@
-import type { UserRepository } from "../domain/ports/UserRepository.js";
-import type { SessionRepository } from "../domain/ports/SessionRepository.js";
+import type { UserRepository } from "../domain/model/ports/UserRepository.js";
+import type { SessionRepository } from "../domain/model/ports/SessionRepository.js";
 import { hashPassword, verifyPassword } from "../../../platform/security/password.js";
 import { assertMinLength } from "../../../platform/validation/validators.js";
 import { HttpError } from "../../../platform/errors/HttpError.js";

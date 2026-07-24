@@ -1,4 +1,4 @@
-import type { CourtRepository } from "../domain/ports/CourtRepository.js";
+import type { CourtRepository } from "../domain/model/ports/CourtRepository.js";
 import type { FileStorage } from "../../../platform/storage/ports/FileStorage.js";
 
 // TS10 — subir una foto de una cancha (RF31).

@@ -1,4 +1,4 @@
-import type { CustomerRepository } from "../domain/ports/CustomerRepository.js";
+import type { CustomerRepository } from "../domain/model/ports/CustomerRepository.js";
 
 // US10 — historial de alquileres de un cliente.
 export function makeGetCustomerHistory(deps: { customers: CustomerRepository }) {

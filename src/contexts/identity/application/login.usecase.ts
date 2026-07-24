@@ -1,6 +1,6 @@
-import type { UserRepository } from "../domain/ports/UserRepository.js";
-import type { SessionRepository } from "../domain/ports/SessionRepository.js";
-import { assertCanLogin } from "../domain/model/User.js";
+import type { UserRepository } from "../domain/model/ports/UserRepository.js";
+import type { SessionRepository } from "../domain/model/ports/SessionRepository.js";
+import { assertCanLogin } from "../domain/model/aggregates/User.js";
 import { verifyPassword } from "../../../platform/security/password.js";
 import { signAccessToken } from "../../../platform/security/jwt.js";
 import { hashToken, tokenExpiryFromNow } from "../../../platform/security/tokens.js";

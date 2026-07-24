@@ -1,6 +1,6 @@
-import type { PaymentRepository } from "../domain/ports/PaymentRepository.js";
-import type { PaymentMethod } from "../domain/model/Payment.js";
-import { assertAmountWithinTotal, resolveStatus } from "../domain/model/Payment.js";
+import type { PaymentRepository } from "../domain/model/ports/PaymentRepository.js";
+import type { PaymentMethod } from "../domain/model/aggregates/Payment.js";
+import { assertAmountWithinTotal, resolveStatus } from "../domain/model/aggregates/Payment.js";
 import { assertPositiveAmount } from "../../../platform/validation/validators.js";
 import { HttpError } from "../../../platform/errors/HttpError.js";
 

@@ -1,16 +1,16 @@
 import { Router } from "express";
 import { requireAuth } from "../../../../platform/middlewares/auth.middleware.js";
-import { bookingRepository } from "../../infrastructure/persistence/PrismaBookingRepository.js";
-import { courtRepository } from "../../infrastructure/persistence/PrismaCourtRepository.js";
-import { notificationSender } from "../../../notifications/infrastructure/ResendNotificationSender.js";
-import { notificationRepository } from "../../../notifications/infrastructure/persistence/PrismaNotificationRepository.js";
-import { adminDirectory } from "../../infrastructure/persistence/PrismaAdminDirectory.js";
+import { bookingRepository } from "../../infrastructure/persistence/repositories/PrismaBookingRepository.js";
+import { courtRepository } from "../../infrastructure/persistence/repositories/PrismaCourtRepository.js";
+import { notificationSender } from "../../../notifications/infrastructure/email/ResendNotificationSender.js";
+import { notificationRepository } from "../../../notifications/infrastructure/persistence/repositories/PrismaNotificationRepository.js";
+import { adminDirectory } from "../../infrastructure/persistence/repositories/PrismaAdminDirectory.js";
 import { makeRegisterBooking } from "../../application/registerBooking.usecase.js";
 import { makeEditBooking } from "../../application/editBooking.usecase.js";
 import { makeCancelBooking } from "../../application/cancelBooking.usecase.js";
 import { makeSearchBookings } from "../../application/searchBookings.usecase.js";
 import { makeRegisterBookingSeries } from "../../application/registerBookingSeries.usecase.js";
-import type { BookingStatus } from "../../domain/model/Booking.js";
+import type { BookingStatus } from "../../domain/model/aggregates/Booking.js";
 
 // Adaptador de entrada : traduce HTTP <-> casos de uso de Aplicacion.
 const registerBooking = makeRegisterBooking({

@@ -1,4 +1,4 @@
-import type { ScheduleBlockRepository } from "../domain/ports/ScheduleBlockRepository.js";
+import type { ScheduleBlockRepository } from "../domain/model/ports/ScheduleBlockRepository.js";
 
 // RF07 — liberar un bloqueo por mantenimiento antes de tiempo.
 export function makeUnblockSchedule(deps: { scheduleBlocks: ScheduleBlockRepository }) {

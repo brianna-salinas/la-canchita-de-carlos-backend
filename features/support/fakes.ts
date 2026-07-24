@@ -1,24 +1,24 @@
 
-import type { BookingRepository, NewBookingData, SearchFilters, BookingWithRelations } from "../../src/contexts/bookings/domain/ports/BookingRepository.js";
-import type { Booking, TimeRange } from "../../src/contexts/bookings/domain/model/Booking.js";
-import type { CourtRepository, CourtAvailability, UpdateCourtData } from "../../src/contexts/bookings/domain/ports/CourtRepository.js";
-import type { Court } from "../../src/contexts/bookings/domain/model/Court.js";
-import type { ScheduleBlockRepository } from "../../src/contexts/bookings/domain/ports/ScheduleBlockRepository.js";
-import type { ScheduleBlock } from "../../src/contexts/bookings/domain/model/ScheduleBlock.js";
-import type { AdminDirectory, AdminSummary } from "../../src/contexts/bookings/domain/ports/AdminDirectory.js";
+import type { BookingRepository, NewBookingData, SearchFilters, BookingWithRelations } from "../../src/contexts/bookings/domain/model/ports/BookingRepository.js";
+import type { Booking, TimeRange } from "../../src/contexts/bookings/domain/model/aggregates/Booking.js";
+import type { CourtRepository, CourtAvailability, UpdateCourtData } from "../../src/contexts/bookings/domain/model/ports/CourtRepository.js";
+import type { Court } from "../../src/contexts/bookings/domain/model/aggregates/Court.js";
+import type { ScheduleBlockRepository } from "../../src/contexts/bookings/domain/model/ports/ScheduleBlockRepository.js";
+import type { ScheduleBlock } from "../../src/contexts/bookings/domain/model/aggregates/ScheduleBlock.js";
+import type { AdminDirectory, AdminSummary } from "../../src/contexts/bookings/domain/model/ports/AdminDirectory.js";
 import type { NotificationSender } from "../../src/contexts/notifications/application/ports/NotificationSender.js";
-import type { NotificationRepository, NewNotificationData } from "../../src/contexts/notifications/domain/ports/NotificationRepository.js";
-import type { Notification } from "../../src/contexts/notifications/domain/model/Notification.js";
-import type { PaymentRepository } from "../../src/contexts/payments/domain/ports/PaymentRepository.js";
-import type { PayableBooking, Payment, PaymentMethod } from "../../src/contexts/payments/domain/model/Payment.js";
+import type { NotificationRepository, NewNotificationData } from "../../src/contexts/notifications/domain/model/ports/NotificationRepository.js";
+import type { Notification } from "../../src/contexts/notifications/domain/model/aggregates/Notification.js";
+import type { PaymentRepository } from "../../src/contexts/payments/domain/model/ports/PaymentRepository.js";
+import type { PayableBooking, Payment, PaymentMethod } from "../../src/contexts/payments/domain/model/aggregates/Payment.js";
 import type { FileStorage, UploadFileInput, UploadResult } from "../../src/platform/storage/ports/FileStorage.js";
-import type { UserRepository, NewUserData } from "../../src/contexts/identity/domain/ports/UserRepository.js";
-import type { User } from "../../src/contexts/identity/domain/model/User.js";
-import type { AccessRequestRepository, NewAccessRequestData } from "../../src/contexts/identity/domain/ports/AccessRequestRepository.js";
-import type { AccessRequest } from "../../src/contexts/identity/domain/model/AccessRequest.js";
-import type { EmailVerificationTokenRepository, EmailVerificationToken } from "../../src/contexts/identity/domain/ports/EmailVerificationTokenRepository.js";
-import type { PasswordResetTokenRepository, PasswordResetToken } from "../../src/contexts/identity/domain/ports/PasswordResetTokenRepository.js";
-import type { SessionRepository } from "../../src/contexts/identity/domain/ports/SessionRepository.js";
+import type { UserRepository, NewUserData } from "../../src/contexts/identity/domain/model/ports/UserRepository.js";
+import type { User } from "../../src/contexts/identity/domain/model/aggregates/User.js";
+import type { AccessRequestRepository, NewAccessRequestData } from "../../src/contexts/identity/domain/model/ports/AccessRequestRepository.js";
+import type { AccessRequest } from "../../src/contexts/identity/domain/model/aggregates/AccessRequest.js";
+import type { EmailVerificationTokenRepository, EmailVerificationToken } from "../../src/contexts/identity/domain/model/ports/EmailVerificationTokenRepository.js";
+import type { PasswordResetTokenRepository, PasswordResetToken } from "../../src/contexts/identity/domain/model/ports/PasswordResetTokenRepository.js";
+import type { SessionRepository } from "../../src/contexts/identity/domain/model/ports/SessionRepository.js";
 
 function dateKey(d: Date): string {
   return d.toISOString().slice(0, 10);

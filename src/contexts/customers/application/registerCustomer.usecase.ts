@@ -1,4 +1,4 @@
-import type { CustomerRepository, NewCustomerData } from "../domain/ports/CustomerRepository.js";
+import type { CustomerRepository, NewCustomerData } from "../domain/model/ports/CustomerRepository.js";
 import { assertNonEmpty, assertMaxLength, normalizeText, normalizePhone, assertValidPhone } from "../../../platform/validation/validators.js";
 import { HttpError } from "../../../platform/errors/HttpError.js";
 

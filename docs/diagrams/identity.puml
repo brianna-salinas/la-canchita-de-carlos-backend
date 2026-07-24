@@ -23,7 +23,7 @@ package "domain.model" {
     +photoUrl: string?
   }
 
-  class "User (funciones de dominio)" as UserRules << (F,orchid) functions >> {
+  class "User (domain)" as UserRules << (F,orchid) functions >> {
     +assertCanLogin(user): void
     +usernameFromEmail(email): string
   }
@@ -46,7 +46,7 @@ package "domain.model" {
     +resolvedAt: Date?
   }
 
-  class "AccessRequest (funciones de dominio)" as AccessRequestRules << (F,orchid) functions >> {
+  class "AccessRequest (domain)" as AccessRequestRules << (F,orchid) functions >> {
     +assertPending(request): void
   }
 

@@ -1,4 +1,4 @@
-import type { PanelRepository } from "../domain/ports/PanelRepository.js";
+import type { PanelRepository } from "../domain/model/ports/PanelRepository.js";
 import { todayRange } from "./getBookingsToday.usecase.js";
 
 // US19 — pagos pendientes del dia (PENDING o PARTIAL), con su saldo.

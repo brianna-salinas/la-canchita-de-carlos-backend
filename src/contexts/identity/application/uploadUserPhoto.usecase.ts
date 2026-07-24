@@ -1,4 +1,4 @@
-import type { UserRepository } from "../domain/ports/UserRepository.js";
+import type { UserRepository } from "../domain/model/ports/UserRepository.js";
 import type { FileStorage } from "../../../platform/storage/ports/FileStorage.js";
 
 // TS10 — foto de perfil de un admin/dueno. Carpeta publica "perfiles".

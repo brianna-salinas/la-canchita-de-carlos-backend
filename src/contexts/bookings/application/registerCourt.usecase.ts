@@ -1,5 +1,5 @@
-import type { CourtRepository } from "../domain/ports/CourtRepository.js";
-import { assertValidPrice, assertValidOperatingHours } from "../domain/model/Court.js";
+import type { CourtRepository } from "../domain/model/ports/CourtRepository.js";
+import { assertValidPrice, assertValidOperatingHours } from "../domain/model/aggregates/Court.js";
 import { assertNonEmpty, assertMaxLength, normalizeText } from "../../../platform/validation/validators.js";
 import { HttpError } from "../../../platform/errors/HttpError.js";
 

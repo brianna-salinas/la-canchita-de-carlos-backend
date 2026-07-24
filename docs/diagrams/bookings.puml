@@ -55,7 +55,7 @@ package "domain.model" {
     +endTime: Date
   }
 
-  class "Booking (funciones de dominio)" as BookingRules << (F,orchid) functions >> {
+  class "Booking (domain)" as BookingRules << (F,orchid) functions >> {
     +overlaps(candidate, existing): boolean
     +hasConflict(candidate, activeBookings, excludeId?): boolean
     +resolvePaymentStatus(booking, newPaidAmount): PaymentStatus
@@ -83,7 +83,7 @@ package "domain.model" {
     MAINTENANCE
   }
 
-  class "Court (funciones de dominio)" as CourtRules << (F,orchid) functions >> {
+  class "Court (domain)" as CourtRules << (F,orchid) functions >> {
     +assertValidPrice(pricePerHour): void
     +assertCourtAvailableForBooking(court): void
     +assertValidOperatingHours(openTime, closeTime): void
@@ -97,7 +97,7 @@ package "domain.model" {
     +reason: string?
   }
 
-  class "ScheduleBlock (funciones de dominio)" as ScheduleBlockRules << (F,orchid) functions >> {
+  class "ScheduleBlock (domain)" as ScheduleBlockRules << (F,orchid) functions >> {
     +assertValidBlockRange(startTime, endTime): void
     +hourlySlots(startTime, endTime): Date[]
   }

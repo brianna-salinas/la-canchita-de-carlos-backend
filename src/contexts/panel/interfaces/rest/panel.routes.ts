@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { requireAuth } from "../../../../platform/middlewares/auth.middleware.js";
-import { panelRepository } from "../../infrastructure/persistence/PrismaPanelRepository.js";
+import { panelRepository } from "../../infrastructure/persistence/repositories/PrismaPanelRepository.js";
 import { makeGetBookingsToday } from "../../application/getBookingsToday.usecase.js";
 import { makeGetIncomeToday } from "../../application/getIncomeToday.usecase.js";
 import { makeGetPendingPaymentsToday } from "../../application/getPendingPaymentsToday.usecase.js";

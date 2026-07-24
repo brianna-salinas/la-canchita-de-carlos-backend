@@ -1,10 +1,10 @@
-import type { BookingRepository } from "../domain/ports/BookingRepository.js";
-import type { CourtRepository } from "../domain/ports/CourtRepository.js";
-import type { AdminDirectory } from "../domain/ports/AdminDirectory.js";
+import type { BookingRepository } from "../domain/model/ports/BookingRepository.js";
+import type { CourtRepository } from "../domain/model/ports/CourtRepository.js";
+import type { AdminDirectory } from "../domain/model/ports/AdminDirectory.js";
 import type { NotificationSender } from "../../notifications/application/ports/NotificationSender.js";
-import type { NotificationRepository } from "../../notifications/domain/ports/NotificationRepository.js";
-import { assertValidRange, assertNotInPast, assertWithinOperatingHours, hasConflict } from "../domain/model/Booking.js";
-import { assertCourtAvailableForBooking } from "../domain/model/Court.js";
+import type { NotificationRepository } from "../../notifications/domain/model/ports/NotificationRepository.js";
+import { assertValidRange, assertNotInPast, assertWithinOperatingHours, hasConflict } from "../domain/model/aggregates/Booking.js";
+import { assertCourtAvailableForBooking } from "../domain/model/aggregates/Court.js";
 import { assertNonEmpty, assertPositiveAmount, normalizeText } from "../../../platform/validation/validators.js";
 import { HttpError } from "../../../platform/errors/HttpError.js";
 
