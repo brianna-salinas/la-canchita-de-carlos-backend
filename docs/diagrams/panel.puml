@@ -1,4 +1,4 @@
-@startuml panel-context
+ @startuml panel-context
 title Bounded Context: Panel
 
 skinparam classAttributeIconSize 0

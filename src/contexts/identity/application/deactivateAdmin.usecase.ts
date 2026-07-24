@@ -1,10 +1,6 @@
 import type { UserRepository } from "../domain/model/ports/UserRepository.js";
 import { HttpError } from "../../../platform/errors/HttpError.js";
 
-// US26-US30 — un owner desactiva la cuenta de otro administrador (soft-delete:
-// no se borra la fila porque tiene reservas/pagos ligados por FK, se marca
-// status=INACTIVE). No se usa para autodesactivarse (ver deactivateOwnAccount)
-// ni permite dejar el sistema sin ningun owner activo.
 export function makeDeactivateAdmin(deps: { users: UserRepository }) {
   return async function deactivateAdmin(actingUserId: number, targetUserId: number) {
     if (actingUserId === targetUserId) {

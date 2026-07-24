@@ -28,9 +28,6 @@ import { withSignedPhotoUrl, withSignedPhotoUrls } from "../../../../platform/st
 const upload = multer({ storage: multer.memoryStorage() });
 const storage = new SupabaseFileStorage();
 
-// El repositorio devuelve la entidad User completa (incluye passwordHash);
-// nunca debe salir tal cual por la API. Antes /:id/foto ya lo devolvia
-// completo por error; se corrige aca de paso.
 function sinPasswordHash<T extends { passwordHash?: string }>(user: T): Omit<T, "passwordHash"> {
   const { passwordHash: _passwordHash, ...safe } = user;
   return safe;
@@ -62,7 +59,6 @@ const updateOwnProfile = makeUpdateOwnProfile({ users: userRepository });
 
 export const usersRouter = Router();
 
-// TS05 / US20 — POST /users/solicitudes (publico, sin sesion — quien solicita aun no tiene cuenta).
 usersRouter.post("/solicitudes", async (req, res, next) => {
   try {
     const request = await requestAdminRegistration(req.body);
@@ -72,7 +68,6 @@ usersRouter.post("/solicitudes", async (req, res, next) => {
   }
 });
 
-// TS11 / US34 — GET /users/verificar?token=... (publico — quien verifica aun no puede iniciar sesion).
 usersRouter.get("/verificar", async (req, res, next) => {
   try {
     const result = await verifyEmail(String(req.query.token));
@@ -82,10 +77,8 @@ usersRouter.get("/verificar", async (req, res, next) => {
   }
 });
 
-// A partir de aqui, todo requiere sesion iniciada.
 usersRouter.use(requireAuth);
 
-// US21 — GET /users/solicitudes (listado de pendientes, solo dueno).
 usersRouter.get("/solicitudes", requireOwner, async (_req, res, next) => {
   try {
     const requests = await listPendingRequests();
@@ -95,7 +88,6 @@ usersRouter.get("/solicitudes", requireOwner, async (_req, res, next) => {
   }
 });
 
-// TS05 / US21 — PATCH /users/solicitudes/:id/autorizar (solo dueno).
 usersRouter.patch("/solicitudes/:id/autorizar", requireOwner, async (req, res, next) => {
   try {
     const result = await authorizeAdminRequest(Number(req.params.id));
@@ -105,7 +97,6 @@ usersRouter.patch("/solicitudes/:id/autorizar", requireOwner, async (req, res, n
   }
 });
 
-// TS05 / US21 — PATCH /users/solicitudes/:id/rechazar (solo dueno).
 usersRouter.patch("/solicitudes/:id/rechazar", requireOwner, async (req, res, next) => {
   try {
     const result = await rejectAdminRequest(Number(req.params.id));
@@ -115,7 +106,6 @@ usersRouter.patch("/solicitudes/:id/rechazar", requireOwner, async (req, res, ne
   }
 });
 
-// Owner es un rol, no un singleton: cualquier owner puede ascender a otro admin activo.
 usersRouter.patch("/:id/promover-dueno", requireOwner, async (req, res, next) => {
   try {
     const result = await promoteToOwner(Number(req.params.id));
@@ -125,7 +115,6 @@ usersRouter.patch("/:id/promover-dueno", requireOwner, async (req, res, next) =>
   }
 });
 
-// RF27 / US26 — GET /users?estado=ACTIVO
 usersRouter.get("/", async (_req, res, next) => {
   try {
     const admins = await listActiveAdmins();
@@ -135,12 +124,6 @@ usersRouter.get("/", async (_req, res, next) => {
   }
 });
 
-// GET /users/me — datos del usuario autenticado con signed URL fresca de su
-// foto de perfil. Antes el frontend solo obtenia la foto una vez (en el login
-// o al subirla) y la guardaba en localStorage; como la signed URL expira a la
-// hora, la foto "desaparecia solita" del navbar aunque siguiera en el bucket.
-// El frontend llama este endpoint periodicamente para renovarla antes de que
-// venza.
 usersRouter.get("/me", async (req, res, next) => {
   try {
     const me = await userRepository.findByIdOrThrow(req.user!.userId);
@@ -150,7 +133,6 @@ usersRouter.get("/me", async (req, res, next) => {
   }
 });
 
-// TS07 / US24 — PATCH /users/me/correo
 usersRouter.patch("/me/correo", async (req, res, next) => {
   try {
     const result = await updateOwnEmail(req.user!.userId, req.body.email);
@@ -160,7 +142,6 @@ usersRouter.patch("/me/correo", async (req, res, next) => {
   }
 });
 
-// TS07 / US25 — PATCH /users/me/contrasena
 usersRouter.patch("/me/contrasena", async (req, res, next) => {
   try {
     const result = await changeOwnPassword(req.user!.userId, req.body.currentPassword, req.body.newPassword);
@@ -170,7 +151,6 @@ usersRouter.patch("/me/contrasena", async (req, res, next) => {
   }
 });
 
-// US26-US30 — PATCH /users/me/perfil (nombre y/o usuario propios).
 usersRouter.patch("/me/perfil", async (req, res, next) => {
   try {
     const result = await updateOwnProfile(req.user!.userId, req.body);
@@ -180,8 +160,6 @@ usersRouter.patch("/me/perfil", async (req, res, next) => {
   }
 });
 
-// US26-US30 — DELETE /users/me (el usuario elimina/desactiva su propia cuenta).
-// Debe declararse antes de DELETE /:id para que "me" no se interprete como un id numerico.
 usersRouter.delete("/me", async (req, res, next) => {
   try {
     const result = await deactivateOwnAccount(req.user!.userId);
@@ -191,7 +169,6 @@ usersRouter.delete("/me", async (req, res, next) => {
   }
 });
 
-// US26-US30 — DELETE /users/:id (un dueno desactiva la cuenta de otro administrador).
 usersRouter.delete("/:id", requireOwner, async (req, res, next) => {
   try {
     const result = await deactivateAdmin(req.user!.userId, Number(req.params.id));
@@ -201,8 +178,6 @@ usersRouter.delete("/:id", requireOwner, async (req, res, next) => {
   }
 });
 
-// TS10 (analogo) — POST /users/:id/foto (foto de perfil, carpeta publica "perfiles").
-// Solo el propio usuario o un dueno puede cambiar la foto de una cuenta.
 usersRouter.post("/:id/foto", upload.single("foto"), async (req, res, next) => {
   try {
     const targetId = Number(req.params.id);
@@ -219,8 +194,6 @@ usersRouter.post("/:id/foto", upload.single("foto"), async (req, res, next) => {
   }
 });
 
-// DELETE /users/:id/foto — quita la foto de perfil (vuelve a mostrar
-// iniciales). Misma regla de permisos que subirla.
 usersRouter.delete("/:id/foto", async (req, res, next) => {
   try {
     const targetId = Number(req.params.id);

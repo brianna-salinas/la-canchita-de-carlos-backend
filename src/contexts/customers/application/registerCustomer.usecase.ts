@@ -2,7 +2,6 @@ import type { CustomerRepository, NewCustomerData } from "../domain/model/ports/
 import { assertNonEmpty, assertMaxLength, normalizeText, normalizePhone, assertValidPhone } from "../../../platform/validation/validators.js";
 import { HttpError } from "../../../platform/errors/HttpError.js";
 
-// US09 — registrar un cliente nuevo.
 export function makeRegisterCustomer(deps: { customers: CustomerRepository }) {
   return async function registerCustomer(input: NewCustomerData) {
     try {

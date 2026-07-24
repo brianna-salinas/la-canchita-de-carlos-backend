@@ -200,7 +200,6 @@ model Customer {
   phone          String         @map("cus_phone") @db.VarChar(30)
   documentNumber String?        @unique @map("cus_document_number") @db.VarChar(20)
   status         CustomerStatus @default(ACTIVE) @map("cus_status")
-  photoUrl       String?        @map("cus_photo_url")
   createdAt      DateTime       @default(now()) @map("cus_created_at") @db.Timestamptz()
   updatedAt      DateTime       @default(now()) @updatedAt @map("cus_updated_at") @db.Timestamptz()
 

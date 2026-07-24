@@ -46,7 +46,6 @@ const unblockSchedule = makeUnblockSchedule({ scheduleBlocks: scheduleBlockRepos
 export const courtsRouter = Router();
 courtsRouter.use(requireAuth);
 
-// US11 — POST /courts
 courtsRouter.post("/", async (req, res, next) => {
   try {
     const court = await registerCourt(req.body);
@@ -56,7 +55,6 @@ courtsRouter.post("/", async (req, res, next) => {
   }
 });
 
-// US26-US30 — PATCH /courts/:id (nombre, deporte, superficie, descripcion, estado).
 courtsRouter.patch("/:id", async (req, res, next) => {
   try {
     const court = await updateCourt(Number(req.params.id), req.body);
@@ -66,9 +64,6 @@ courtsRouter.patch("/:id", async (req, res, next) => {
   }
 });
 
-// US26-US30 — DELETE /courts/:id: borrado real e irreversible. Borra la
-// cancha y, en cascada (a nivel de base de datos), sus bloqueos de
-// horario, sus reservas y los pagos de esas reservas.
 courtsRouter.delete("/:id", async (req, res, next) => {
   try {
     await deleteCourt(Number(req.params.id));
@@ -78,9 +73,6 @@ courtsRouter.delete("/:id", async (req, res, next) => {
   }
 });
 
-// GET /courts (listado completo para administracion, incluye pausadas
-// (enabled=false); para disponibilidad/reservas usar
-// GET /courts/disponibilidad, que solo trae las habilitadas).
 courtsRouter.get("/", async (_req, res, next) => {
   try {
     const courts = await listCourts();
@@ -90,7 +82,6 @@ courtsRouter.get("/", async (_req, res, next) => {
   }
 });
 
-// US12 — PATCH /courts/:id/precio
 courtsRouter.patch("/:id/precio", async (req, res, next) => {
   try {
     const court = await updateCourtPrice(Number(req.params.id), req.body.pricePerHour);
@@ -100,7 +91,6 @@ courtsRouter.patch("/:id/precio", async (req, res, next) => {
   }
 });
 
-// US13 — GET /courts/disponibilidad?fecha=YYYY-MM-DD
 courtsRouter.get("/disponibilidad", async (req, res, next) => {
   try {
     const courts = await getConsolidatedAvailability(String(req.query.fecha));
@@ -110,7 +100,6 @@ courtsRouter.get("/disponibilidad", async (req, res, next) => {
   }
 });
 
-// RF07/RF32/US07/US31 — POST /courts/:id/bloqueos (bloquear franja por mantenimiento).
 courtsRouter.post("/:id/bloqueos", async (req, res, next) => {
   try {
     const blocks = await blockSchedule({ ...req.body, courtId: Number(req.params.id) });
@@ -120,9 +109,6 @@ courtsRouter.post("/:id/bloqueos", async (req, res, next) => {
   }
 });
 
-// Mantenimiento recurrente ("cada jueves", "un dia al mes", etc.) — el
-// frontend calcula las fechas concretas y las manda todas juntas, igual que
-// ya hace /bookings/serie para reservas recurrentes.
 courtsRouter.post("/:id/bloqueos/serie", async (req, res, next) => {
   try {
     const blocks = await blockScheduleSeries({ ...req.body, courtId: Number(req.params.id), actorUserId: req.user!.userId });
@@ -132,10 +118,6 @@ courtsRouter.post("/:id/bloqueos/serie", async (req, res, next) => {
   }
 });
 
-// GET /courts/:id/bloqueos/proximos — mantenimientos programados desde hoy
-// en adelante (para poder verlos/cancelarlos desde Canchas). Debe declararse
-// antes de GET /:id/bloqueos para que "proximos" no se intente leer como
-// parte de la query de esa ruta.
 courtsRouter.get("/:id/bloqueos/proximos", async (req, res, next) => {
   try {
     const blocks = await listUpcomingScheduleBlocks(Number(req.params.id));
@@ -145,7 +127,6 @@ courtsRouter.get("/:id/bloqueos/proximos", async (req, res, next) => {
   }
 });
 
-// RF32/US31 — GET /courts/:id/bloqueos?fecha=YYYY-MM-DD
 courtsRouter.get("/:id/bloqueos", async (req, res, next) => {
   try {
     const blocks = await listScheduleBlocks(Number(req.params.id), String(req.query.fecha));
@@ -155,7 +136,6 @@ courtsRouter.get("/:id/bloqueos", async (req, res, next) => {
   }
 });
 
-// RF07 — DELETE /courts/bloqueos/:blockId (liberar un bloqueo antes de tiempo).
 courtsRouter.delete("/bloqueos/:blockId", async (req, res, next) => {
   try {
     await unblockSchedule(Number(req.params.blockId));
@@ -165,7 +145,6 @@ courtsRouter.delete("/bloqueos/:blockId", async (req, res, next) => {
   }
 });
 
-// TS10 — POST /courts/:id/fotos
 courtsRouter.post("/:id/fotos", upload.single("foto"), async (req, res, next) => {
   try {
     if (!req.file) {

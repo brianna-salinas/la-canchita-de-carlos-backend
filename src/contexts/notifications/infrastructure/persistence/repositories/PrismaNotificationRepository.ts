@@ -2,7 +2,6 @@ import { prisma } from "../../../../../db.js";
 import type { NotificationRepository, NewNotificationData } from "../../../domain/model/ports/NotificationRepository.js";
 import type { Notification } from "../../../domain/model/aggregates/Notification.js";
 
-// Adaptador de salida: implementa NotificationRepository (in-app) contra Prisma/PostgreSQL.
 export class PrismaNotificationRepository implements NotificationRepository {
   async createForUsers(userIds: number[], data: NewNotificationData): Promise<void> {
     if (userIds.length === 0) return;

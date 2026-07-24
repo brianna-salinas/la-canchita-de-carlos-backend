@@ -25,8 +25,6 @@ export interface UserRepository {
   listActiveAdmins(): Promise<Pick<User, "id" | "name" | "email" | "isOwner" | "lastAccess" | "photoUrl">[]>;
   listOwnerEmails(): Promise<string[]>;
   updatePhoto(userId: number, photoUrl: string | null): Promise<User>;
-  // Reautoriza una cuenta previamente desactivada (mismo id/email/username, se
-  // conserva su historial) en vez de crear una fila nueva — usado cuando una
-  // solicitud de acceso llega con el correo de un usuario en estado INACTIVE.
+
   reactivate(userId: number, data: { name: string; passwordHash: string }): Promise<User>;
 }

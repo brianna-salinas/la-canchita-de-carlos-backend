@@ -15,17 +15,13 @@ export interface RegisterBookingInput {
   customerName: string;
   customerEmail?: string;
   type?: string;
-  date: string; // YYYY-MM-DD
-  startTime: string; // HH:mm
-  endTime: string; // HH:mm
+  date: string;
+  startTime: string;
+  endTime: string;
   totalAmount: number;
-  actorUserId?: number; // quien registra (para avisar al resto de admins, no al mismo).
+  actorUserId?: number;
 }
 
-// TS01 (+ TS09, creacion de cliente embebida) — caso de uso de Aplicacion: orquesta el
-// dominio (regla RF06 de no-doble-reserva) contra los puertos BookingRepository/CourtRepository,
-// y dispara las notificaciones (RF23/RF24) fuera de la transaccion, sin poder revertirla:
-// una al cliente (si dejo correo) y otra al resto de admins activos (in-app + correo).
 export function makeRegisterBooking(deps: {
   bookings: BookingRepository;
   courts: CourtRepository;
@@ -38,8 +34,6 @@ export function makeRegisterBooking(deps: {
     const startTime = new Date(`1970-01-01T${input.startTime}:00Z`);
     const endTime = new Date(`1970-01-01T${input.endTime}:00Z`);
 
-    // Se busca la cancha antes de validar (y no solo despues, para las
-    // notificaciones) para poder revisar su horario de atencion.
     const court = await deps.courts.findByIdOrThrow(input.courtId);
 
     try {
@@ -58,7 +52,7 @@ export function makeRegisterBooking(deps: {
     const booking = await deps.bookings.runTransaction(async (tx) => {
       const candidates = await tx.findActiveOverlapCandidates(input.courtId, date);
       if (hasConflict({ startTime, endTime }, candidates)) {
-        // Equivalente a DoubleBookingRejected: se rechaza la operacion sin persistir nada.
+
         throw new HttpError(409, "Ya existe un alquiler activo para esa cancha en ese horario.");
       }
       if (await tx.isTimeBlocked(input.courtId, date, { startTime, endTime })) {
@@ -66,7 +60,7 @@ export function makeRegisterBooking(deps: {
       }
 
       let customerId = input.customerId;
-      // TS09 — si viene clienteNuevo en vez de customerId, se crea en la misma transaccion.
+
       if (!customerId && input.clienteNuevo) {
         const customer = await tx.createEmbeddedCustomer(input.clienteNuevo);
         customerId = customer.id;
@@ -84,9 +78,6 @@ export function makeRegisterBooking(deps: {
       });
     });
 
-    // RF23/RF24 — las notificaciones corren fuera de la transaccion y nunca revierten el alquiler.
-    // (la cancha ya se obtuvo mas arriba, antes de validar el horario)
-
     if (input.customerEmail) {
       void deps.notifier.sendBookingConfirmation({
         to: input.customerEmail,
@@ -98,7 +89,6 @@ export function makeRegisterBooking(deps: {
       });
     }
 
-    // Aviso entre administradores: el resto de admins activos se entera (in-app + correo).
     const otherAdmins = await deps.admins.listOtherActiveAdmins(input.actorUserId);
     if (otherAdmins.length > 0) {
       const registeredByName = input.actorUserId ? await deps.admins.findAdminNameOrThrow(input.actorUserId) : "Un administrador";

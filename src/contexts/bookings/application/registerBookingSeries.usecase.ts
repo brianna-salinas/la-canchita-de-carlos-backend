@@ -16,20 +16,15 @@ export interface RegisterBookingSeriesInput {
   customerName: string;
   customerEmail?: string;
   type?: string;
-  dates: string[]; // YYYY-MM-DD, una por fecha de la serie (el frontend calcula la recurrencia)
-  startTime: string; // HH:mm, igual para todas las fechas
-  endTime: string; // HH:mm, igual para todas las fechas
-  totalAmount: number; // interpretacion depende de seriesPaymentMode (ver abajo)
+  dates: string[];
+  startTime: string;
+  endTime: string;
+  totalAmount: number;
   seriesPaymentMode: "INDIVIDUAL" | "LUMP_SUM";
   seriesLabel?: string;
-  bookingType?: "MULTIDAY" | "RECURRING"; // default RECURRING si hay mas de 1 fecha
+  bookingType?: "MULTIDAY" | "RECURRING";
   actorUserId?: number;
 }
-
-// Reservas multidia/recurrentes (schema: bookingType/seriesId/seriesPaymentMode/etc.,
-// ya soportado por el frontend). El backend generaba unicamente Booking SINGLE; este
-// caso de uso crea N Booking en una misma transaccion, todos ligados por seriesId,
-// revalidando RF06 (no-doble-reserva) fecha por fecha.
 
 export function makeRegisterBookingSeries(deps: {
   bookings: BookingRepository;
@@ -46,8 +41,6 @@ export function makeRegisterBookingSeries(deps: {
     const startTime = new Date(`1970-01-01T${input.startTime}:00Z`);
     const endTime = new Date(`1970-01-01T${input.endTime}:00Z`);
 
-    // Se busca la cancha antes de validar (y no solo despues, para las
-    // notificaciones) para poder revisar su horario de atencion.
     const court = await deps.courts.findByIdOrThrow(input.courtId);
 
     try {
@@ -115,8 +108,6 @@ export function makeRegisterBookingSeries(deps: {
       return created;
     });
 
-    // RF23/RF24 — una sola notificacion resumen para toda la serie, fuera de la transaccion.
-    // (la cancha ya se obtuvo mas arriba, antes de validar el horario)
     const dateLabel = `${input.dates[0]} (+${total - 1} fecha(s) mas)`;
 
     if (input.customerEmail) {

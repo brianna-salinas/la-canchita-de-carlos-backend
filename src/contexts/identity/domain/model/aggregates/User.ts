@@ -1,4 +1,4 @@
-// Entidad de dominio pura del aggregate User (bounded context Identity & Access, generico).
+
 export type UserStatus = "PENDING_VERIFICATION" | "ACTIVE" | "INACTIVE";
 
 export interface User {
@@ -13,7 +13,6 @@ export interface User {
   photoUrl?: string | null;
 }
 
-// RF20/TS02 — reglas puras de elegibilidad para iniciar sesion.
 export function assertCanLogin(user: Pick<User, "status">): void {
   if (user.status === "PENDING_VERIFICATION") {
     throw new Error("Tu cuenta aun no fue verificada. Revisa tu correo para activarla (RF34).");

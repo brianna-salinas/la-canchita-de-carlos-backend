@@ -13,9 +13,8 @@ const supabase =
   SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY ? createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY) : null;
 
 const ALLOWED_MIME = ["image/jpeg", "image/png", "image/webp"];
-const MAX_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
+const MAX_SIZE_BYTES = 5 * 1024 * 1024;
 
-// Adaptador de salida: implementa el puerto FileStorage contra Supabase Storage (TS08/TS10).
 export class SupabaseFileStorage implements FileStorage {
   async upload({ folder, buffer, mimeType, originalName }: UploadFileInput): Promise<UploadResult> {
     if (!ALLOWED_MIME.includes(mimeType)) {
@@ -40,9 +39,6 @@ export class SupabaseFileStorage implements FileStorage {
       throw new HttpError(500, `No se pudo subir la imagen: ${error.message}`);
     }
 
-    // El bucket es privado (para poder ocultar los comprobantes de pago),
-    // asi que ninguna carpeta tiene URL publica fija: se devuelve solo la
-    // ruta, y quien la necesite pide un signed URL con createSignedUrl().
     return { path, url: null };
   }
 

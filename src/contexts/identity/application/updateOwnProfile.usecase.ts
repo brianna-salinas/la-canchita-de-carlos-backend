@@ -7,9 +7,6 @@ export interface UpdateOwnProfileInput {
   username?: string;
 }
 
-// US26-US30 — actualizar el nombre y/o usuario propios. El correo y la
-// contrasena ya tienen su propio endpoint dedicado (updateOwnEmail /
-// changeOwnPassword) porque ya existian antes de esto.
 export function makeUpdateOwnProfile(deps: { users: UserRepository }) {
   return async function updateOwnProfile(userId: number, input: UpdateOwnProfileInput) {
     const data: { name?: string; username?: string } = {};

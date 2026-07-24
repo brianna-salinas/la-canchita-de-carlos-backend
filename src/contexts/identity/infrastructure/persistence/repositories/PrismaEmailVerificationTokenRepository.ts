@@ -4,7 +4,6 @@ import type {
   EmailVerificationToken,
 } from "../../../domain/model/ports/EmailVerificationTokenRepository.js";
 
-// Adaptador de salida: implementa EmailVerificationTokenRepository contra Prisma/PostgreSQL (RF34/TS11).
 export class PrismaEmailVerificationTokenRepository implements EmailVerificationTokenRepository {
   async create(data: { userId: number; tokenHash: string; expiresAt: Date }): Promise<void> {
     await prisma.emailVerificationToken.create({ data });

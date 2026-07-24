@@ -2,7 +2,6 @@ import { prisma } from "../../../../../db.js";
 import type { ScheduleBlockRepository } from "../../../domain/model/ports/ScheduleBlockRepository.js";
 import type { ScheduleBlock } from "../../../domain/model/aggregates/ScheduleBlock.js";
 
-// Adaptador de salida: implementa ScheduleBlockRepository contra Prisma/PostgreSQL.
 export class PrismaScheduleBlockRepository implements ScheduleBlockRepository {
   async createMany(courtId: number, date: Date, times: Date[], reason?: string): Promise<ScheduleBlock[]> {
     return prisma.$transaction(times.map((time) => prisma.scheduleBlock.create({ data: { courtId, date, time, reason } })));

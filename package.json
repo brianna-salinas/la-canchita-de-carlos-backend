@@ -5,7 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test": "cross-env NODE_OPTIONS=--import=tsx/esm cucumber-js",
-    "dev": "tsx watch src/index.ts"
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc --noEmit",
+    "start": "tsx src/index.ts",
+    "postinstall": "prisma generate"
   },
   "repository": {
     "type": "git",

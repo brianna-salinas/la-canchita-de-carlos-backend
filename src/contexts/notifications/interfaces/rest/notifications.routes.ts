@@ -10,7 +10,6 @@ const markNotificationRead = makeMarkNotificationRead({ notifications: notificat
 export const notificationsRouter = Router();
 notificationsRouter.use(requireAuth);
 
-// GET /notifications — notificaciones in-app del admin logueado (ej. NEW_BOOKING).
 notificationsRouter.get("/", async (req, res, next) => {
   try {
     const notifications = await listMyNotifications(req.user!.userId);
@@ -20,7 +19,6 @@ notificationsRouter.get("/", async (req, res, next) => {
   }
 });
 
-// PATCH /notifications/:id/leida
 notificationsRouter.patch("/:id/leida", async (req, res, next) => {
   try {
     await markNotificationRead(Number(req.params.id));

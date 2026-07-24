@@ -1,5 +1,5 @@
-// Entidad de dominio pura del aggregate Notification (bounded context Notifications):
-// notificacion in-app persistida, distinta del correo (eso es NotificationSender).
+
+
 export type NotificationType =
   | "ACCESS_REQUEST"
   | "PAYMENT_PENDING"

@@ -9,17 +9,11 @@ const CAMPO_LEGIBLE: Record<string, string> = {
   usu_email: "el correo",
 };
 
-// Middleware final: centraliza el manejo de errores para no repetir try/catch
-// con status codes en cada ruta.
 export function errorMiddleware(err: unknown, _req: Request, res: Response, _next: NextFunction) {
   if (err instanceof HttpError) {
     return res.status(err.status).json({ error: err.message });
   }
 
-  // Antes una violacion de restriccion unica (ej. DNI repetido al crear un
-  // cliente) no se manejaba en ningun lado: Prisma la lanzaba tal cual y caia
-  // al 500 generico de mas abajo, sin mensaje util — desde la UI eso se veia
-  // simplemente como "no funciona", sin pista de que el dato ya existia.
   if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
     const target = err.meta?.target;
     const columnas = Array.isArray(target) ? target : [String(target ?? "")];
@@ -27,12 +21,6 @@ export function errorMiddleware(err: unknown, _req: Request, res: Response, _nex
     return res.status(409).json({ error: `Ya existe un registro con ese valor en ${legibles || "un campo único"}.` });
   }
 
-  // Violacion de llave foranea (ej. borrar una cancha que todavia tiene
-  // reservas/bloqueos/pagos ligados por FK con ON DELETE RESTRICT). Sin
-  // esto caia al 500 generico "Error interno del servidor" sin ninguna
-  // pista de la causa real. Lo mas probable es que falte aplicar la
-  // migracion que cambia esas FK a ON DELETE CASCADE
-  // (prisma/migrations/20260722180001_court_delete_cascade).
   if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2003") {
     return res.status(409).json({
       error:
@@ -40,8 +28,6 @@ export function errorMiddleware(err: unknown, _req: Request, res: Response, _nex
     });
   }
 
-  // Errores de subida de archivos (multer): campo de form-data incorrecto, archivo muy
-  // grande, etc. Sin esto caian al 500 generico y no se entendia la causa real.
   if (err instanceof MulterError) {
     if (err.code === "LIMIT_UNEXPECTED_FILE") {
       return res

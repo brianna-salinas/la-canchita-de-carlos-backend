@@ -1,9 +1,5 @@
 import type { ScheduleBlockRepository } from "../domain/model/ports/ScheduleBlockRepository.js";
 
-// RF07/RF32 — lista los mantenimientos programados (desde hoy en adelante)
-// de una cancha, para poder verlos y cancelarlos desde Canchas (antes solo
-// se podian crear, no habia forma de verlos agrupados ni de deshacerlos si
-// alguien se equivocaba).
 export function makeListUpcomingScheduleBlocks(deps: { scheduleBlocks: ScheduleBlockRepository }) {
   return function listUpcomingScheduleBlocks(courtId: number) {
     const hoy = new Date();

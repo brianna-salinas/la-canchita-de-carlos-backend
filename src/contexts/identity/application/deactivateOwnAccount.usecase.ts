@@ -2,10 +2,6 @@ import type { UserRepository } from "../domain/model/ports/UserRepository.js";
 import type { SessionRepository } from "../domain/model/ports/SessionRepository.js";
 import { HttpError } from "../../../platform/errors/HttpError.js";
 
-// US26-US30 — el propio usuario elimina (desactiva) su cuenta. Si es el unico
-// owner activo, se bloquea para no dejar el sistema sin administrador con
-// privilegios de dueno. Al desactivarse, se cierran sus sesiones (mismo
-// patron que changeOwnPassword al rotar credenciales).
 export function makeDeactivateOwnAccount(deps: { users: UserRepository; sessions: SessionRepository }) {
   return async function deactivateOwnAccount(userId: number) {
     const user = await deps.users.findByIdOrThrow(userId);

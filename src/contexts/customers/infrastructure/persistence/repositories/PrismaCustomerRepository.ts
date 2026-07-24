@@ -6,7 +6,6 @@ import type {
 } from "../../../domain/model/ports/CustomerRepository.js";
 import type { Customer } from "../../../domain/model/aggregates/Customer.js";
 
-// Adaptador de salida: implementa CustomerRepository contra Prisma/PostgreSQL.
 export class PrismaCustomerRepository implements CustomerRepository {
   async create(data: NewCustomerData): Promise<Customer> {
     return prisma.customer.create({ data });
@@ -44,9 +43,6 @@ export class PrismaCustomerRepository implements CustomerRepository {
     }));
   }
 
-  async updatePhoto(customerId: number, photoUrl: string): Promise<Customer> {
-    return prisma.customer.update({ where: { id: customerId }, data: { photoUrl } });
-  }
 }
 
 export const customerRepository: CustomerRepository = new PrismaCustomerRepository();

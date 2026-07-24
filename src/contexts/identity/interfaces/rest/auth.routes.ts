@@ -37,7 +37,6 @@ authRouter.post("/bootstrap-dueno", async (req, res, next) => {
   }
 });
 
-// TS02 — POST /auth/login
 authRouter.post("/login", async (req, res, next) => {
   try {
     const { usernameOrEmail, password } = req.body;
@@ -47,16 +46,13 @@ authRouter.post("/login", async (req, res, next) => {
       ip: req.ip,
       userAgent: req.headers["user-agent"],
     });
-    // El photoUrl que devuelve el usecase es el path guardado en DB, no una
-    // URL usable (bucket privado): hay que resolverlo a signed URL aca, igual
-    // que en el resto de endpoints que devuelven fotos.
+
     res.status(200).json({ ...result, user: await withSignedPhotoUrl(storage, result.user) });
   } catch (err) {
     next(err);
   }
 });
 
-// "¿Olvidaste tu contrasena?" — publico, sin sesion. Nunca revela si el correo existe.
 authRouter.post("/olvide-password", async (req, res, next) => {
   try {
     const result = await requestPasswordReset(req.body.email);
@@ -66,7 +62,6 @@ authRouter.post("/olvide-password", async (req, res, next) => {
   }
 });
 
-// Confirmacion del reseteo con el token recibido por correo — publico, sin sesion.
 authRouter.post("/restablecer-password", async (req, res, next) => {
   try {
     const result = await resetPassword(req.body.token, req.body.newPassword);
@@ -76,7 +71,6 @@ authRouter.post("/restablecer-password", async (req, res, next) => {
   }
 });
 
-// POST /auth/logout
 authRouter.post("/logout", requireAuth, async (req, res, next) => {
   try {
     const token = req.headers.authorization!.slice("Bearer ".length);

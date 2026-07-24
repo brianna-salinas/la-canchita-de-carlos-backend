@@ -1,8 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 import { verifyAccessToken } from "../security/jwt.js";
 
-// Protege cualquier endpoint que requiera sesion iniciada (US03: ningun dato del
-// negocio es accesible sin sesion valida).
 export function requireAuth(req: Request, res: Response, next: NextFunction) {
   const header = req.headers.authorization;
   if (!header || !header.startsWith("Bearer ")) {

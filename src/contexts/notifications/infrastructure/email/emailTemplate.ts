@@ -1,8 +1,4 @@
-// Plantilla HTML compartida para todos los correos transaccionales, con el
-// mismo estilo visual del frontend (colores de marca, logo, tipografia).
-// Usa tablas y estilos inline a proposito: es lo unico que renderiza de
-// forma consistente en la mayoria de clientes de correo (Gmail, Outlook,
-// Apple Mail), a diferencia de flexbox/grid o clases CSS externas.
+
 
 const FRONTEND_URL = process.env.FRONTEND_URL ?? "http://localhost:5173";
 
@@ -21,11 +17,7 @@ interface EmailLayoutParams {
 
 export function renderEmailLayout(params: EmailLayoutParams): string {
   const { preheader, heading, bodyHtml, cta } = params;
-  // Debe ser una URL absoluta y publicamente accesible: un cliente de correo
-  // no puede resolver rutas relativas como "/assets/logo.png", necesita
-  // poder descargarla desde internet. Por eso depende de FRONTEND_URL — si
-  // sigue apuntando a localhost, el logo no va a cargar en el correo recibido
-  // (localhost no es alcanzable desde fuera de esta maquina).
+
   const logoUrl = `${FRONTEND_URL}/assets/logo.png`;
 
   return `<!DOCTYPE html>

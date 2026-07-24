@@ -18,8 +18,6 @@ function toBooking(row: any): Booking {
   };
 }
 
-// Adaptador de salida : implementa BookingRepository
-// contra Prisma/PostgreSQL. Si el negocio cambia de ORM, solo se reemplaza esta clase.
 export class PrismaBookingRepository implements BookingRepository {
   constructor(private readonly db: Db = prisma) {}
 

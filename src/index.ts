@@ -19,7 +19,6 @@ const FRONTEND_URL = process.env.FRONTEND_URL ?? "http://localhost:5173";
 app.use(cors({ origin: FRONTEND_URL }));
 app.use(express.json());
 
-// Cada router es el adaptador de entrada (HTTP) de su bounded context (4.0/4.2).
 app.use("/health", healthRouter);
 app.use("/auth", authRouter);
 app.use("/bookings", bookingsRouter);

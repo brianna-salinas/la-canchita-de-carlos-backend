@@ -2,7 +2,6 @@ import type { UserRepository } from "../domain/model/ports/UserRepository.js";
 import { normalizeEmail, assertValidEmail } from "../../../platform/validation/validators.js";
 import { HttpError } from "../../../platform/errors/HttpError.js";
 
-// TS07 / RF28 / US24 — actualizar el correo propio.
 export function makeUpdateOwnEmail(deps: { users: UserRepository }) {
   return async function updateOwnEmail(userId: number, newEmail: string) {
     const email = normalizeEmail(newEmail);

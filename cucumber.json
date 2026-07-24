@@ -10,7 +10,8 @@
       "features/payments.feature",
       "features/access_requests.feature",
       "features/maintenance_blocks.feature",
-      "features/notifications.feature"
+      "features/notifications.feature",
+      "features/password_reset.feature"
     ],
     "format": ["progress-bar"]
   }

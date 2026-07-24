@@ -5,9 +5,6 @@ import { hashPassword } from "../../../platform/security/password.js";
 import { assertMinLength } from "../../../platform/validation/validators.js";
 import { HttpError } from "../../../platform/errors/HttpError.js";
 
-// Confirma el reseteo de contraseña con el token recibido por correo.
-// Invalida todas las sesiones activas del usuario tras el cambio, igual que
-// changeOwnPassword.
 export function makeResetPassword(deps: {
   passwordResetTokens: PasswordResetTokenRepository;
   sessions: SessionRepository;

@@ -10,7 +10,6 @@ function toPayment(p: { id: number; bookingId: number; amount: unknown; method: 
   return { id: p.id, bookingId: p.bookingId, amount: Number(p.amount), method: p.method as PaymentMethod, createdAt: p.createdAt };
 }
 
-// Adaptador de salida: implementa PaymentRepository contra Prisma/PostgreSQL.
 export class PrismaPaymentRepository implements PaymentRepository {
   async findBookingOrThrow(bookingId: number): Promise<PayableBooking> {
     const booking = await prisma.booking.findUniqueOrThrow({ where: { id: bookingId } });

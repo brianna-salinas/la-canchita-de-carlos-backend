@@ -2,9 +2,8 @@ import type { PaymentRepository } from "../domain/model/ports/PaymentRepository.
 import type { FileStorage } from "../../../platform/storage/ports/FileStorage.js";
 import { HttpError } from "../../../platform/errors/HttpError.js";
 
-const DEFAULT_EXPIRES_IN_SECONDS = 300; // 5 minutos: suficiente para ver/descargar el comprobante.
+const DEFAULT_EXPIRES_IN_SECONDS = 300;
 
-// TS08 — genera un enlace temporal para ver un comprobante guardado en el bucket privado.
 export function makeGetReceiptSignedUrl(deps: { payments: PaymentRepository; storage: FileStorage }) {
   return async function getReceiptSignedUrl(bookingId: number) {
     const path = await deps.payments.getReceiptPath(bookingId);

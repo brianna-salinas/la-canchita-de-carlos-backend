@@ -31,8 +31,6 @@ export interface TimeRange {
   endTime: Date;
 }
 
-// RF06 — invariante central del dominio: no puede existir otro Booking activo que se
-// superponga con la misma cancha + franja horaria. Regla pura y testeable sin DB ni servidor.
 export function overlaps(candidate: TimeRange, existing: TimeRange): boolean {
   return candidate.startTime < existing.endTime && candidate.endTime > existing.startTime;
 }
@@ -45,8 +43,6 @@ export function hasConflict(
   return activeBookings.some((b) => b.id !== excludeBookingId && overlaps(candidate, b));
 }
 
-// Deriva el estado de pago de forma consistente cuando se edita totalAmount/paidAmount
-// directamente (fuera del flujo normal de registerPayment.usecase.ts en Payments).
 export function resolvePaymentStatus(totalAmount: number, paidAmount: number): PaymentStatus {
   if (paidAmount <= 0) return "PENDING";
   if (paidAmount >= totalAmount) return "PAID";
@@ -59,12 +55,6 @@ export function assertValidRange(range: TimeRange): void {
   }
 }
 
-// Cada cancha puede tener su propio horario de atencion (openTime/closeTime
-// en Court, opcional). Antes esto solo se usaba para pintar el calendario
-// en el frontend; el backend nunca revisaba que una reserva realmente
-// cayera dentro de ese horario, asi que se podia crear (o editar) una
-// reserva a las 6am para una cancha que abre a las 8am. Si la cancha no
-// tiene horario configurado (null), se considera abierta las 24 horas.
 export function assertWithinOperatingHours(
   openTime: string | null | undefined,
   closeTime: string | null | undefined,
@@ -86,12 +76,6 @@ export function assertWithinOperatingHours(
   }
 }
 
-// El sistema opera en Peru (UTC-5), pero el servidor puede correr en cualquier
-// timezone (en el sandbox de desarrollo corre en UTC). Para saber "que dia y
-// hora es ahora" de forma consistente con como se guardan date/startTime
-// (componentes de calendario en horario de Peru, representados como Date UTC
-// por conveniencia de parseo), se usa Intl con timeZone America/Lima en vez
-// de los getters locales del servidor.
 const PERU_TIME_ZONE = "America/Lima";
 
 function getPeruDateTimeParts(now: Date): { year: number; month: number; day: number; hour: number; minute: number } {
@@ -108,11 +92,6 @@ function getPeruDateTimeParts(now: Date): { year: number; month: number; day: nu
   return { year: get("year"), month: get("month"), day: get("day"), hour: get("hour"), minute: get("minute") };
 }
 
-// RF?? — no tiene sentido registrar (ni reprogramar) una reserva en una fecha
-// u hora que ya paso. `date` es el dia de la reserva (componentes UTC = dia
-// calendario en Peru) y `startTime` es la hora de inicio (componentes UTC =
-// hora del dia en Peru). `now` es opcional para poder testear con una hora
-// fija.
 export function assertNotInPast(date: Date, startTime: Date, now: Date = new Date()): void {
   const nowParts = getPeruDateTimeParts(now);
   const bookingDateUTC = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());

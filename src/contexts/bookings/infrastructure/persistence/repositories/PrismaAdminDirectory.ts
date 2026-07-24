@@ -1,7 +1,6 @@
 import { prisma } from "../../../../../db.js";
 import type { AdminDirectory, AdminSummary } from "../../../domain/model/ports/AdminDirectory.js";
 
-// Adaptador de salida: implementa AdminDirectory contra la tabla users de Prisma.
 export class PrismaAdminDirectory implements AdminDirectory {
   async listOtherActiveAdmins(excludeUserId?: number): Promise<AdminSummary[]> {
     const admins = await prisma.user.findMany({

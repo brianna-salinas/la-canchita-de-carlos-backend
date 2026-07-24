@@ -3,11 +3,6 @@ import type { PasswordResetTokenRepository } from "../domain/model/ports/Passwor
 import type { NotificationSender } from "../../notifications/application/ports/NotificationSender.js";
 import { generateRawToken, hashToken, tokenExpiryFromNow } from "../../../platform/security/tokens.js";
 
-// "¿Olvidaste tu contrasena?" — genera un token de un solo uso y lo envia por
-// correo. Nunca revela si el correo existe o no en la respuesta (evita que se
-// use para enumerar cuentas registradas); solo cuentas ACTIVE reciben el
-// correo (cuentas INACTIVE/PENDING_VERIFICATION no deberian poder resetear
-// asi, ya tienen sus propios flujos).
 export function makeRequestPasswordReset(deps: {
   users: UserRepository;
   passwordResetTokens: PasswordResetTokenRepository;

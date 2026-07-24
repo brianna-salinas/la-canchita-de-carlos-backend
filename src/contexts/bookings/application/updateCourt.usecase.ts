@@ -9,18 +9,13 @@ export interface UpdateCourtInput {
   surface?: string;
   description?: string;
   status?: "ACTIVE" | "MAINTENANCE";
-  // string = nuevo valor, null = quitar el horario (queda sin restriccion),
-  // undefined = no tocar el valor actual.
+
   openTime?: string | null;
   closeTime?: string | null;
-  // Pausar (false) o reanudar (true) la cancha sin borrarla.
+
   enabled?: boolean;
 }
 
-// US26-US30 — edita los datos generales de una cancha ya creada
-// (nombre, deporte, superficie, descripcion, estado operativo, horario
-// de atencion). El precio y la foto tienen su propio endpoint dedicado
-// (updateCourtPrice / addCourtPhoto) porque ya existian antes de esto.
 export function makeUpdateCourt(deps: { courts: CourtRepository }) {
   return async function updateCourt(courtId: number, input: UpdateCourtInput) {
     const actual = await deps.courts.findByIdOrThrow(courtId);

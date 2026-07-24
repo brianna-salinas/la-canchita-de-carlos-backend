@@ -2,7 +2,6 @@ import type { CustomerRepository, NewCustomerData } from "../domain/model/ports/
 import { assertNonEmpty, assertMaxLength, normalizeText, normalizePhone, assertValidPhone } from "../../../platform/validation/validators.js";
 import { HttpError } from "../../../platform/errors/HttpError.js";
 
-// US09 — editar un cliente.
 export function makeUpdateCustomer(deps: { customers: CustomerRepository }) {
   return async function updateCustomer(customerId: number, input: Partial<NewCustomerData>) {
     const data: Partial<NewCustomerData> = { ...input };

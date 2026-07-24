@@ -16,7 +16,6 @@ package "domain.model" {
     +phone: string
     +documentNumber: string?
     +status: CustomerStatus
-    +photoUrl: string?
   }
 }
 
@@ -43,7 +42,6 @@ package "domain.ports" {
     +deactivate(customerId): Promise<Customer>
     +list(search?): Promise<Customer[]>
     +getBookingHistory(customerId): Promise<CustomerHistoryEntry[]>
-    +updatePhoto(customerId, photoUrl): Promise<Customer>
   }
 
   CustomerRepository ..> Customer
@@ -63,20 +61,12 @@ package "application" {
   class deactivateCustomer << (F,orchid) factory >>
   class listCustomers << (F,orchid) factory >>
   class getCustomerHistory << (F,orchid) factory >>
-  class uploadCustomerPhoto << (F,orchid) factory >>
-
-  interface "FileStorage (platform)" as FileStorage {
-    +upload(input): Promise<UploadResult>
-    +createSignedUrl(path, expiresInSeconds): Promise<string>
-  }
 
   registerCustomer ..> CustomerRepository
   updateCustomer ..> CustomerRepository
   deactivateCustomer ..> CustomerRepository
   listCustomers ..> CustomerRepository
   getCustomerHistory ..> CustomerRepository
-  uploadCustomerPhoto ..> CustomerRepository
-  uploadCustomerPhoto ..> FileStorage
 }
 
 @enduml

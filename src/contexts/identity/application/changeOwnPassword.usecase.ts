@@ -4,7 +4,6 @@ import { hashPassword, verifyPassword } from "../../../platform/security/passwor
 import { assertMinLength } from "../../../platform/validation/validators.js";
 import { HttpError } from "../../../platform/errors/HttpError.js";
 
-// TS07 / RF29 / US25 — cambiar la contraseña propia, validando la actual, e invalidando sesiones activas.
 export function makeChangeOwnPassword(deps: { users: UserRepository; sessions: SessionRepository }) {
   return async function changeOwnPassword(userId: number, currentPassword: string, newPassword: string) {
     try {

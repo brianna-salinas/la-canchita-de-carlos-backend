@@ -3,7 +3,6 @@ import type { AccessRequestRepository, NewAccessRequestData } from "../../../dom
 import type { AccessRequest } from "../../../domain/model/aggregates/AccessRequest.js";
 import { HttpError } from "../../../../../platform/errors/HttpError.js";
 
-// Adaptador de salida: implementa AccessRequestRepository contra Prisma/PostgreSQL.
 export class PrismaAccessRequestRepository implements AccessRequestRepository {
   async findByEmailPending(email: string): Promise<AccessRequest | null> {
     return prisma.accessRequest.findFirst({ where: { email, status: "PENDING" } });

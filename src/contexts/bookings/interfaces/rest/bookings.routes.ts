@@ -12,7 +12,6 @@ import { makeSearchBookings } from "../../application/searchBookings.usecase.js"
 import { makeRegisterBookingSeries } from "../../application/registerBookingSeries.usecase.js";
 import type { BookingStatus } from "../../domain/model/aggregates/Booking.js";
 
-// Adaptador de entrada : traduce HTTP <-> casos de uso de Aplicacion.
 const registerBooking = makeRegisterBooking({
   bookings: bookingRepository,
   courts: courtRepository,
@@ -34,7 +33,6 @@ const registerBookingSeries = makeRegisterBookingSeries({
 export const bookingsRouter = Router();
 bookingsRouter.use(requireAuth);
 
-// TS01 (+ TS09) — POST /bookings
 bookingsRouter.post("/", async (req, res, next) => {
   try {
     const booking = await registerBooking({ ...req.body, actorUserId: req.user!.userId });
@@ -44,7 +42,6 @@ bookingsRouter.post("/", async (req, res, next) => {
   }
 });
 
-// Reservas multidia/recurrentes — POST /bookings/serie
 bookingsRouter.post("/serie", async (req, res, next) => {
   try {
     const bookings = await registerBookingSeries({ ...req.body, actorUserId: req.user!.userId });
@@ -54,7 +51,6 @@ bookingsRouter.post("/serie", async (req, res, next) => {
   }
 });
 
-// US05 — PATCH /bookings/:id
 bookingsRouter.patch("/:id", async (req, res, next) => {
   try {
     const booking = await editBooking(Number(req.params.id), req.body);
@@ -64,7 +60,6 @@ bookingsRouter.patch("/:id", async (req, res, next) => {
   }
 });
 
-// US05 — POST /bookings/:id/cancelar
 bookingsRouter.post("/:id/cancelar", async (req, res, next) => {
   try {
     const booking = await cancelBooking(Number(req.params.id));
@@ -74,7 +69,6 @@ bookingsRouter.post("/:id/cancelar", async (req, res, next) => {
   }
 });
 
-// US08 — GET /bookings?courtId=&customerId=&status=&from=&to=
 bookingsRouter.get("/", async (req, res, next) => {
   try {
     const { courtId, customerId, status, from, to } = req.query;

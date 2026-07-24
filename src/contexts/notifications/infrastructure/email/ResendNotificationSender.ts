@@ -9,7 +9,6 @@ const FRONTEND_URL = process.env.FRONTEND_URL ?? "http://localhost:5173";
 
 const resend = RESEND_API_KEY ? new Resend(RESEND_API_KEY) : null;
 
-// Adaptador de salida: implementa el puerto NotificationSender contra Resend.
 export class ResendNotificationSender implements NotificationSender {
   private async send(to: string, subject: string, html: string): Promise<void> {
     if (!resend) {
@@ -19,12 +18,11 @@ export class ResendNotificationSender implements NotificationSender {
     try {
       await resend.emails.send({ from: RESEND_FROM_EMAIL, to, subject, html });
     } catch (err) {
-      // RF24: un fallo de envio nunca debe revertir ni bloquear la operacion que lo disparo.
+
       console.error(`[email] fallo al enviar a ${to}:`, err);
     }
   }
 
-  // RF23/RF24 — confirmacion de alquiler registrado.
   sendBookingConfirmation(params: {
     to: string;
     customerName: string;
@@ -54,7 +52,6 @@ export class ResendNotificationSender implements NotificationSender {
     return this.send(to, "Confirmacion de tu alquiler — La Canchita de Carlos", html);
   }
 
-  // RF22 — resultado de una solicitud de acceso (autorizada o rechazada).
   sendAdminDecision(params: { to: string; name: string; approved: boolean }): Promise<void> {
     const { to, name, approved } = params;
     const subject = approved ? "Tu solicitud de acceso fue autorizada" : "Tu solicitud de acceso fue rechazada";
@@ -70,7 +67,6 @@ export class ResendNotificationSender implements NotificationSender {
     return this.send(to, subject, html);
   }
 
-  // RF34 — verificacion de correo antes de activar la cuenta.
   sendEmailVerification(params: { to: string; name: string; rawToken: string }): Promise<void> {
     const { to, name, rawToken } = params;
     const link = `${FRONTEND_URL}/verificar-correo?token=${rawToken}`;
@@ -86,7 +82,6 @@ export class ResendNotificationSender implements NotificationSender {
     return this.send(to, "Verifica tu correo — La Canchita de Carlos", html);
   }
 
-  // "¿Olvidaste tu contraseña?" — enlace de un solo uso para restablecerla.
   sendPasswordReset(params: { to: string; name: string; rawToken: string }): Promise<void> {
     const { to, name, rawToken } = params;
     const link = `${FRONTEND_URL}/restablecer-password?token=${rawToken}`;
@@ -102,7 +97,6 @@ export class ResendNotificationSender implements NotificationSender {
     return this.send(to, "Restablece tu contraseña — La Canchita de Carlos", html);
   }
 
-  // RF21 — avisa a un owner que hay una solicitud de acceso nueva para revisar.
   sendNewAccessRequestAlert(params: { to: string; requesterName: string; requesterEmail: string }): Promise<void> {
     const { to, requesterName, requesterEmail } = params;
     const html = renderEmailLayout({
@@ -117,7 +111,6 @@ export class ResendNotificationSender implements NotificationSender {
     return this.send(to, "Nueva solicitud de acceso — La Canchita de Carlos", html);
   }
 
-  // Aviso entre administradores de una reserva nueva registrada por otro admin.
   sendNewBookingAlert(params: {
     to: string;
     registeredByName: string;
@@ -148,6 +141,4 @@ export class ResendNotificationSender implements NotificationSender {
   }
 }
 
-// Instancia unica del adaptador (composicion simple, sin contenedor de DI — coherente
-// con la eleccion de Express sobre NestJS en 4.7).
 export const notificationSender: NotificationSender = new ResendNotificationSender();

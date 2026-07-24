@@ -9,20 +9,13 @@ import { HttpError } from "../../../platform/errors/HttpError.js";
 
 export interface BlockScheduleSeriesInput {
   courtId: number;
-  dates: string[]; // YYYY-MM-DD, una por fecha (el frontend calcula la recurrencia: semanal/mensual/etc.)
-  startTime: string; // HH:mm, igual para todas las fechas
-  endTime: string; // HH:mm, igual para todas las fechas
+  dates: string[];
+  startTime: string;
+  endTime: string;
   reason?: string;
-  actorUserId?: number; // quien programa el mantenimiento (para avisar al resto de admins, no al mismo).
+  actorUserId?: number;
 }
 
-// Igual que blockSchedule (RF07/RF32), pero para varias fechas de una sola
-// vez ("programar mantenimiento recurrente": cada jueves, un dia al mes,
-// etc.). El frontend calcula las fechas concretas de la serie, igual que ya
-// hace para las reservas recurrentes (ver registerBookingSeries.usecase.ts).
-// Ademas de crear los ScheduleBlock, avisa al resto de administradores
-// activos (in-app, campanita) — antes esto no existia y la campanita nunca
-// mostraba nada relacionado a mantenimiento.
 export function makeBlockScheduleSeries(deps: {
   scheduleBlocks: ScheduleBlockRepository;
   bookings: BookingRepository;
@@ -46,10 +39,6 @@ export function makeBlockScheduleSeries(deps: {
       throw new HttpError(400, (e as Error).message);
     }
 
-    // Se valida TODA la serie antes de crear nada, para no dejar bloqueos a
-    // medias si una sola fecha de la serie tiene un alquiler activo en esa
-    // franja, o si alguna fecha/hora ya paso (antes esto no se revisaba: se
-    // podia "programar" un mantenimiento para una hora que ya paso).
     for (const dateStr of input.dates) {
       const date = new Date(dateStr);
       try {
@@ -74,8 +63,6 @@ export function makeBlockScheduleSeries(deps: {
       created.push(...blocks);
     }
 
-    // Aviso entre administradores (in-app, campanita) — una sola notificacion
-    // para toda la serie, no una por fecha/hora.
     const otherAdmins = await deps.admins.listOtherActiveAdmins(input.actorUserId);
     if (otherAdmins.length > 0) {
       const registeredByName = input.actorUserId ? await deps.admins.findAdminNameOrThrow(input.actorUserId) : "Un administrador";

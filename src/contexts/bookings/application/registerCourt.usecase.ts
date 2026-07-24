@@ -12,9 +12,6 @@ export interface RegisterCourtInput {
   closeTime?: string;
 }
 
-// US11 — registrar una cancha nueva (nombre unico dentro del negocio). El
-// horario de atencion es opcional: si el usuario no lo configura, la cancha
-// queda disponible las 24 horas (sin restriccion de franja horaria).
 export function makeRegisterCourt(deps: { courts: CourtRepository }) {
   return async function registerCourt(input: RegisterCourtInput) {
     const openTime = input.openTime || null;

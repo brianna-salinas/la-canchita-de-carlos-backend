@@ -14,7 +14,6 @@ function toSummary(b: any): PanelBookingSummary {
   };
 }
 
-// Adaptador de salida: implementa PanelRepository (reporting) contra Prisma/PostgreSQL.
 export class PrismaPanelRepository implements PanelRepository {
   async getBookingsForDate(date: Date): Promise<PanelBookingSummary[]> {
     const bookings = await prisma.booking.findMany({

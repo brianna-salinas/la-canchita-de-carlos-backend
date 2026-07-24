@@ -11,6 +11,7 @@ import {
   FakeUserRepository,
   FakeAccessRequestRepository,
   FakeEmailVerificationTokenRepository,
+  FakePasswordResetTokenRepository,
   FakeSessionRepository,
 } from "./fakes.js";
 
@@ -26,6 +27,7 @@ export class CustomWorld extends CucumberWorld {
   users = new FakeUserRepository();
   accessRequests = new FakeAccessRequestRepository();
   emailVerificationTokens = new FakeEmailVerificationTokenRepository(this.users);
+  passwordResetTokens = new FakePasswordResetTokenRepository(this.users);
   sessions = new FakeSessionRepository();
 
   lastResult: unknown;
@@ -40,6 +42,7 @@ export class CustomWorld extends CucumberWorld {
   verificationRawToken: string | undefined;
   knownPassword: string | undefined;
   lastNotificationId: number | undefined;
+  passwordResetRawToken: string | undefined;
 }
 
 setWorldConstructor(CustomWorld);

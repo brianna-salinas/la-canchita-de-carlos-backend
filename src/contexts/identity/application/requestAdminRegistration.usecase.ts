@@ -21,7 +21,6 @@ export interface RequestAdminRegistrationInput {
   password: string;
 }
 
-// TS05 / US20 — registrar una solicitud de cuenta de administrador (RF20).
 export function makeRequestAdminRegistration(deps: {
   users: UserRepository;
   accessRequests: AccessRequestRepository;
@@ -44,9 +43,6 @@ export function makeRequestAdminRegistration(deps: {
       throw new HttpError(400, (e as Error).message);
     }
 
-    // Si el correo pertenece a una cuenta desactivada (soft-delete), se deja pasar:
-    // al autorizar la solicitud se reactiva esa misma fila en vez de bloquear el
-    // registro para siempre por un email/username que ya nadie puede usar.
     const existingUser = await deps.users.findByEmail(email);
     if (existingUser && existingUser.status !== "INACTIVE") {
       throw new HttpError(409, "Ya existe una cuenta con ese correo.");
@@ -64,8 +60,6 @@ export function makeRequestAdminRegistration(deps: {
       passwordHash,
     });
 
-    // RF21/RF24 — avisa a los owners activos, fuera de la ruta critica: un fallo de
-    // envio nunca debe impedir que la solicitud quede registrada.
     const ownerEmails = await deps.users.listOwnerEmails();
     for (const to of ownerEmails) {
       void deps.notifier.sendNewAccessRequestAlert({ to, requesterName: normalizeText(input.name), requesterEmail: email });

@@ -10,8 +10,6 @@ export interface RegisterPaymentInput {
   method: PaymentMethod;
 }
 
-// TS03 — registra un pago (total o parcial), persistiendo el metodo (RF16/US16) y
-// recalculando el saldo del Booking (US14/US15) en una sola transaccion atomica.
 export function makeRegisterPayment(deps: { payments: PaymentRepository }) {
   return async function registerPayment(input: RegisterPaymentInput) {
     try {

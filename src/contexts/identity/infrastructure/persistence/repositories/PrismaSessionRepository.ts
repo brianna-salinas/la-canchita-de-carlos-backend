@@ -1,7 +1,6 @@
 import { prisma } from "../../../../../db.js";
 import type { SessionRepository } from "../../../domain/model/ports/SessionRepository.js";
 
-// Adaptador de salida: implementa SessionRepository contra Prisma/PostgreSQL.
 export class PrismaSessionRepository implements SessionRepository {
   async create(data: { userId: number; tokenHash: string; ipAddress?: string; userAgent?: string; expiresAt: Date }): Promise<void> {
     await prisma.session.create({ data });

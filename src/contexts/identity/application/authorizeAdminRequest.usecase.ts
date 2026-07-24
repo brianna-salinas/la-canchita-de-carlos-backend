@@ -7,8 +7,6 @@ import { usernameFromEmail } from "../domain/model/aggregates/User.js";
 import { generateRawToken, hashToken, tokenExpiryFromNow } from "../../../platform/security/tokens.js";
 import { HttpError } from "../../../platform/errors/HttpError.js";
 
-// TS05 / US21 — autorizar una solicitud pendiente (solo dueno, requireOwner en el adaptador HTTP).
-// Crea el User en PENDING_VERIFICATION y dispara el correo de verificacion (RF34).
 export function makeAuthorizeAdminRequest(deps: {
   users: UserRepository;
   accessRequests: AccessRequestRepository;
@@ -23,10 +21,6 @@ export function makeAuthorizeAdminRequest(deps: {
       throw new HttpError(409, (e as Error).message);
     }
 
-    // Si el correo de la solicitud pertenece a una cuenta previamente
-    // desactivada, se reactiva esa misma fila (mismo id/username, conserva su
-    // historial de reservas/notificaciones) en vez de crear un usuario nuevo —
-    // el email/username son unicos en la base, un create() aqui chocaria.
     const existingInactiveUser = await deps.users.findByEmail(request.email);
     const user =
       existingInactiveUser && existingInactiveUser.status === "INACTIVE"

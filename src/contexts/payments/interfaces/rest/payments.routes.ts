@@ -22,7 +22,6 @@ const VALID_METHODS = ["EFECTIVO", "YAPE", "OTRO"];
 export const paymentsRouter = Router();
 paymentsRouter.use(requireAuth);
 
-// TS03 / RF16 / US16 — POST /payments (exige un metodo valido: efectivo, Yape u otro).
 paymentsRouter.post("/", async (req, res, next) => {
   try {
     if (!VALID_METHODS.includes(req.body.method)) {
@@ -35,7 +34,6 @@ paymentsRouter.post("/", async (req, res, next) => {
   }
 });
 
-// US16 — GET /payments/:bookingId (historial de pagos de un alquiler, con su metodo).
 paymentsRouter.get("/:bookingId", async (req, res, next) => {
   try {
     const payments = await listPaymentsForBooking(Number(req.params.bookingId));
@@ -45,7 +43,6 @@ paymentsRouter.get("/:bookingId", async (req, res, next) => {
   }
 });
 
-// TS08 — POST /payments/:bookingId/comprobante
 paymentsRouter.post("/:bookingId/comprobante", upload.single("comprobante"), async (req, res, next) => {
   try {
     if (!req.file) {
@@ -58,7 +55,6 @@ paymentsRouter.post("/:bookingId/comprobante", upload.single("comprobante"), asy
   }
 });
 
-// TS08 — GET /payments/:bookingId/comprobante (URL firmada de vida corta, bucket privado).
 paymentsRouter.get("/:bookingId/comprobante", async (req, res, next) => {
   try {
     const result = await getReceiptSignedUrl(Number(req.params.bookingId));

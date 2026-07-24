@@ -3,8 +3,6 @@ import { prisma } from "../../../db.js";
 
 export const healthRouter = Router();
 
-// TS04 — verifica que el backend y la base de datos esten operativos (Render suspende
-// el servicio por inactividad en planes gratuitos; en Starter no hay cold start, ver 4.7.2).
 healthRouter.get("/", async (_req, res) => {
   try {
     await prisma.$queryRaw`SELECT 1`;

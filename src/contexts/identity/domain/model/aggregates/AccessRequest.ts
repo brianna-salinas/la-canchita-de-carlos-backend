@@ -1,4 +1,4 @@
-// Entidad de dominio pura del aggregate AccessRequest (RF20/TS05).
+
 export type AccessRequestStatus = "PENDING" | "APPROVED" | "REJECTED";
 
 export interface AccessRequest {

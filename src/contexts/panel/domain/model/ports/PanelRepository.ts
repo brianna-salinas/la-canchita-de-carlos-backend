@@ -1,5 +1,5 @@
-// El panel es un modelo de lectura (reporting) sobre datos de Bookings/Payments,
-// no un aggregate propio: expone consultas agregadas para el dashboard del dia (US17-19).
+
+
 export interface PanelBookingSummary {
   id: number;
   startTime: Date;

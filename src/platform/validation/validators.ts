@@ -1,7 +1,3 @@
-// Validaciones y normalizaciones de campos de entrada, reutilizables entre bounded
-// contexts. Viven en platform/ porque son transversales (formato de correo, de
-// telefono, de texto) y no una regla de negocio de un context en particular.
-
 export function normalizeText(value: string): string {
   return value.trim().replace(/\s+/g, " ");
 }
@@ -36,9 +32,6 @@ export function assertValidEmail(email: string): void {
   }
 }
 
-// Celulares peruanos: 9 digitos, empiezan en 9. Aceptamos que venga con codigo de
-// pais (+51), espacios, guiones o parentesis, y lo normalizamos a solo digitos con
-// el 51 adelante (mismo formato que espera un link wa.me de WhatsApp).
 export function normalizePhone(phone: string): string {
   const digits = phone.replace(/\D/g, "");
   if (digits.length === 9 && digits.startsWith("9")) return `51${digits}`;

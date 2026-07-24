@@ -2,7 +2,6 @@ import type { EmailVerificationTokenRepository } from "../domain/model/ports/Ema
 import { hashToken } from "../../../platform/security/tokens.js";
 import { HttpError } from "../../../platform/errors/HttpError.js";
 
-// TS11 / US34 — verificar el correo (RF34). Activa la cuenta solo si el token es valido y vigente.
 export function makeVerifyEmail(deps: { emailVerificationTokens: EmailVerificationTokenRepository }) {
   return async function verifyEmail(rawToken: string) {
     const tokenHash = hashToken(rawToken);

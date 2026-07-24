@@ -2,7 +2,6 @@ import { prisma } from "../../../../../db.js";
 import type { UserRepository, NewUserData } from "../../../domain/model/ports/UserRepository.js";
 import type { User } from "../../../domain/model/aggregates/User.js";
 
-// Adaptador de salida: implementa UserRepository contra Prisma/PostgreSQL.
 export class PrismaUserRepository implements UserRepository {
   async findByUsernameOrEmail(usernameOrEmail: string): Promise<User | null> {
     return prisma.user.findFirst({ where: { OR: [{ username: usernameOrEmail }, { email: usernameOrEmail }] } });
@@ -53,9 +52,7 @@ export class PrismaUserRepository implements UserRepository {
   }
 
   async listActiveAdmins() {
-    // Antes no se seleccionaba photoUrl (se pensaba como "listado liviano"),
-    // asi que ningun administrador mostraba su foto en la lista de
-    // Administracion/Solicitudes de Acceso, aunque la tuviera subida.
+
     return prisma.user.findMany({
       where: { status: "ACTIVE" },
       select: { id: true, name: true, email: true, isOwner: true, lastAccess: true, photoUrl: true },

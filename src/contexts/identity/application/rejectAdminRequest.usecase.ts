@@ -3,7 +3,6 @@ import type { NotificationSender } from "../../notifications/application/ports/N
 import { assertPending } from "../domain/model/aggregates/AccessRequest.js";
 import { HttpError } from "../../../platform/errors/HttpError.js";
 
-// TS05 / US21 — rechazar una solicitud pendiente (solo dueno).
 export function makeRejectAdminRequest(deps: { accessRequests: AccessRequestRepository; notifier: NotificationSender }) {
   return async function rejectAdminRequest(requestId: number) {
     const request = await deps.accessRequests.findByIdOrThrow(requestId);
