@@ -350,6 +350,10 @@ export class FakeFileStorage implements FileStorage {
     if (!this.files.has(path)) throw new Error("File not found");
     return `https://fake.storage/signed/${path}?expires=${expiresInSeconds}`;
   }
+
+  async delete(path: string): Promise<void> {
+    this.files.delete(path);
+  }
 }
 
 export class FakeUserRepository implements UserRepository {

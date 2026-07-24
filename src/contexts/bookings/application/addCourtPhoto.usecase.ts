@@ -6,6 +6,8 @@ export function makeAddCourtPhoto(deps: { courts: CourtRepository; storage: File
     courtId: number,
     file: { buffer: Buffer; mimetype: string; originalname: string }
   ) {
+    const previous = await deps.courts.findByIdOrThrow(courtId);
+
     const result = await deps.storage.upload({
       folder: "canchas",
       buffer: file.buffer,
@@ -13,6 +15,14 @@ export function makeAddCourtPhoto(deps: { courts: CourtRepository; storage: File
       originalName: file.originalname,
     });
 
-    return deps.courts.updatePhoto(courtId, result.path);
+    const updated = await deps.courts.updatePhoto(courtId, result.path);
+
+    if (previous.photoUrl && previous.photoUrl !== result.path) {
+      try {
+        await deps.storage.delete(previous.photoUrl);
+      } catch {}
+    }
+
+    return updated;
   };
 }

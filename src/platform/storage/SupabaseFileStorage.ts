@@ -52,4 +52,14 @@ export class SupabaseFileStorage implements FileStorage {
     }
     return data.signedUrl;
   }
+
+  async delete(path: string): Promise<void> {
+    if (!supabase) {
+      throw new HttpError(500, "Supabase Storage no esta configurado (SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY).");
+    }
+    const { error } = await supabase.storage.from(BUCKET).remove([path]);
+    if (error) {
+      throw new HttpError(500, `No se pudo eliminar el archivo: ${error.message}`);
+    }
+  }
 }

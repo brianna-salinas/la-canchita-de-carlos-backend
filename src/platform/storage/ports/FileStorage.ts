@@ -17,4 +17,6 @@ export interface FileStorage {
   upload(input: UploadFileInput): Promise<UploadResult>;
 
   createSignedUrl(path: string, expiresInSeconds: number): Promise<string>;
+
+  delete(path: string): Promise<void>;
 }

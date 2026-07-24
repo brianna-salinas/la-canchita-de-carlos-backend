@@ -6,6 +6,8 @@ export function makeUploadUserPhoto(deps: { users: UserRepository; storage: File
     userId: number,
     file: { buffer: Buffer; mimetype: string; originalname: string }
   ) {
+    const previous = await deps.users.findByIdOrThrow(userId);
+
     const result = await deps.storage.upload({
       folder: "perfiles",
       buffer: file.buffer,
@@ -13,6 +15,14 @@ export function makeUploadUserPhoto(deps: { users: UserRepository; storage: File
       originalName: file.originalname,
     });
 
-    return deps.users.updatePhoto(userId, result.path);
+    const updated = await deps.users.updatePhoto(userId, result.path);
+
+    if (previous.photoUrl && previous.photoUrl !== result.path) {
+      try {
+        await deps.storage.delete(previous.photoUrl);
+      } catch {}
+    }
+
+    return updated;
   };
 }
