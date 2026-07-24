@@ -19,6 +19,14 @@ const FRONTEND_URL = process.env.FRONTEND_URL ?? "http://localhost:5173";
 app.use(cors({ origin: FRONTEND_URL }));
 app.use(express.json());
 
+app.get("/", (_req, res) => {
+  res.status(200).json({
+    service: "La Canchita de Carlos — API",
+    status: "ok",
+    health: "/health",
+  });
+});
+
 app.use("/health", healthRouter);
 app.use("/auth", authRouter);
 app.use("/bookings", bookingsRouter);
@@ -28,6 +36,10 @@ app.use("/payments", paymentsRouter);
 app.use("/panel", panelRouter);
 app.use("/users", usersRouter);
 app.use("/notifications", notificationsRouter);
+
+app.use((_req, res) => {
+  res.status(404).json({ error: "Ruta no encontrada." });
+});
 
 app.use(errorMiddleware);
 
