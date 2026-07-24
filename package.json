@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "test": "cross-env NODE_OPTIONS=--import=tsx/esm cucumber-js",
     "dev": "tsx watch src/index.ts",
