@@ -17,6 +17,7 @@ import type { User } from "../../src/contexts/identity/domain/model/User.js";
 import type { AccessRequestRepository, NewAccessRequestData } from "../../src/contexts/identity/domain/ports/AccessRequestRepository.js";
 import type { AccessRequest } from "../../src/contexts/identity/domain/model/AccessRequest.js";
 import type { EmailVerificationTokenRepository, EmailVerificationToken } from "../../src/contexts/identity/domain/ports/EmailVerificationTokenRepository.js";
+import type { PasswordResetTokenRepository, PasswordResetToken } from "../../src/contexts/identity/domain/ports/PasswordResetTokenRepository.js";
 import type { SessionRepository } from "../../src/contexts/identity/domain/ports/SessionRepository.js";
 
 function dateKey(d: Date): string {
@@ -255,6 +256,9 @@ export class FakeNotificationSender implements NotificationSender {
   async sendEmailVerification(params: any) {
     await this.deliver("emailVerification", params.to, params);
   }
+  async sendPasswordReset(params: any) {
+    await this.deliver("passwordReset", params.to, params);
+  }
   async sendNewAccessRequestAlert(params: any) {
     await this.deliver("newAccessRequestAlert", params.to, params);
   }
@@ -436,9 +440,17 @@ export class FakeUserRepository implements UserRepository {
     return [...this.users.values()].filter((u) => u.isOwner).map((u) => u.email);
   }
 
-  async updatePhoto(userId: number, photoUrl: string): Promise<User> {
+  async updatePhoto(userId: number, photoUrl: string | null): Promise<User> {
     const u = this.users.get(userId)!;
     u.photoUrl = photoUrl;
+    return u;
+  }
+
+  async reactivate(userId: number, data: { name: string; passwordHash: string }): Promise<User> {
+    const u = this.users.get(userId)!;
+    u.name = data.name;
+    u.passwordHash = data.passwordHash;
+    u.status = "PENDING_VERIFICATION";
     return u;
   }
 }
@@ -510,6 +522,28 @@ export class FakeEmailVerificationTokenRepository implements EmailVerificationTo
     const t = this.tokens.get(tokenId);
     if (t) t.used = true;
     await this.users.activate(userId);
+  }
+}
+
+export class FakePasswordResetTokenRepository implements PasswordResetTokenRepository {
+  tokens = new Map<number, PasswordResetToken & { tokenHash: string }>();
+  private nextId = 1;
+
+  constructor(private users: FakeUserRepository) {}
+
+  async create(data: { userId: number; tokenHash: string; expiresAt: Date }): Promise<void> {
+    const id = this.nextId++;
+    this.tokens.set(id, { id, userId: data.userId, used: false, expiresAt: data.expiresAt, tokenHash: data.tokenHash });
+  }
+
+  async findByTokenHash(tokenHash: string): Promise<PasswordResetToken | null> {
+    return [...this.tokens.values()].find((t) => t.tokenHash === tokenHash) ?? null;
+  }
+
+  async markUsedAndUpdatePassword(tokenId: number, userId: number, passwordHash: string): Promise<void> {
+    const t = this.tokens.get(tokenId);
+    if (t) t.used = true;
+    await this.users.updatePasswordHash(userId, passwordHash);
   }
 }
 

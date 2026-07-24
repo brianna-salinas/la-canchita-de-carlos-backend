@@ -54,22 +54,9 @@ package "domain.ports" {
 }
 
 package "infrastructure.persistence" {
-  class PrismaPaymentRepository {
-    +findBookingOrThrow(bookingId)
-    +registerPaymentAtomic(bookingId, amount, method, newPaidAmount, status)
-    +listPaymentsForBooking(bookingId)
-    +attachReceipt(bookingId, receiptPath)
-    +getReceiptPath(bookingId)
-  }
+  class PrismaPaymentRepository
 
   PrismaPaymentRepository ..|> PaymentRepository
-  note right of PrismaPaymentRepository
-    registerPaymentAtomic usa
-    prisma.$transaction para
-    crear el Payment y
-    actualizar el saldo del
-    Booking de forma atomica.
-  end note
 }
 
 package "application (casos de uso)" {

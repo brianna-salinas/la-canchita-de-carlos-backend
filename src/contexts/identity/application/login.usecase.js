@@ -1,0 +1,50 @@
+import { assertCanLogin } from "../domain/model/User.js";
+import { verifyPassword } from "../../../platform/security/password.js";
+import { signAccessToken } from "../../../platform/security/jwt.js";
+import { hashToken, tokenExpiryFromNow } from "../../../platform/security/tokens.js";
+import { HttpError } from "../../../platform/errors/HttpError.js";
+// TS02 — login por username o correo. Emite SessionStarted (US01).
+export function makeLogin(deps) {
+    return async function login(input) {
+        const usernameOrEmail = input.usernameOrEmail.trim();
+        const user = await deps.users.findByUsernameOrEmail(usernameOrEmail);
+        if (!user) {
+            throw new HttpError(401, "Usuario o contrasena incorrectos.");
+        }
+        try {
+            assertCanLogin(user);
+        }
+        catch (e) {
+            throw new HttpError(401, e.message);
+        }
+        const validPassword = await verifyPassword(input.password, user.passwordHash);
+        if (!validPassword) {
+            throw new HttpError(401, "Usuario o contrasena incorrectos.");
+        }
+        const accessToken = signAccessToken({ userId: user.id, isOwner: user.isOwner });
+        // Guardamos un hash del propio JWT como "token de sesion" para poder listar/revocar sesiones (US03).
+        await deps.sessions.create({
+            userId: user.id,
+            tokenHash: hashToken(accessToken),
+            ipAddress: input.ip,
+            userAgent: input.userAgent,
+            expiresAt: tokenExpiryFromNow(8),
+        });
+        await deps.users.updateLastAccess(user.id);
+        return {
+            accessToken,
+            // photoUrl se incluye aca como el path guardado en DB; se resuelve a
+            // signed URL en la capa de rutas (auth.routes.ts), igual que en el
+            // resto de endpoints que devuelven fotos (ver photoUrl.helper.ts).
+            user: {
+                id: user.id,
+                name: user.name,
+                username: user.username,
+                email: user.email,
+                isOwner: user.isOwner,
+                photoUrl: user.photoUrl ?? null,
+            },
+        };
+    };
+}
+//# sourceMappingURL=login.usecase.js.map

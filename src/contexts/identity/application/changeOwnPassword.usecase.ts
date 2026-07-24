@@ -4,11 +4,11 @@ import { hashPassword, verifyPassword } from "../../../platform/security/passwor
 import { assertMinLength } from "../../../platform/validation/validators.js";
 import { HttpError } from "../../../platform/errors/HttpError.js";
 
-// TS07 / RF29 / US25 — cambiar la contrasena propia, validando la actual, e invalidando sesiones activas.
+// TS07 / RF29 / US25 — cambiar la contraseña propia, validando la actual, e invalidando sesiones activas.
 export function makeChangeOwnPassword(deps: { users: UserRepository; sessions: SessionRepository }) {
   return async function changeOwnPassword(userId: number, currentPassword: string, newPassword: string) {
     try {
-      assertMinLength(newPassword, 8, "La nueva contrasena");
+      assertMinLength(newPassword, 8, "La nueva contraseña");
     } catch (e) {
       throw new HttpError(400, (e as Error).message);
     }
@@ -17,7 +17,7 @@ export function makeChangeOwnPassword(deps: { users: UserRepository; sessions: S
 
     const valid = await verifyPassword(currentPassword, user.passwordHash);
     if (!valid) {
-      throw new HttpError(401, "La contrasena actual no es correcta.");
+      throw new HttpError(401, "La contraseña actual no es correcta.");
     }
 
     const newHash = await hashPassword(newPassword);

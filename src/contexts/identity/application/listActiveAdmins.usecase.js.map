@@ -1,0 +1,1 @@
+{"version":3,"file":"listActiveAdmins.usecase.js","sourceRoot":"","sources":["listActiveAdmins.usecase.ts"],"names":[],"mappings":"AAEA,qFAAqF;AACrF,MAAM,UAAU,oBAAoB,CAAC,IAA+B;IAClE,OAAO,SAAS,gBAAgB;QAC9B,OAAO,IAAI,CAAC,KAAK,CAAC,gBAAgB,EAAE,CAAC;IACvC,CAAC,CAAC;AACJ,CAAC"}

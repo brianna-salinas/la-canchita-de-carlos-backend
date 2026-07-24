@@ -15,6 +15,9 @@ export interface NotificationSender {
 
   sendEmailVerification(params: { to: string; name: string; rawToken: string }): Promise<void>;
 
+  // "¿Olvidaste tu contrasena?" — enlace de un solo uso para restablecerla.
+  sendPasswordReset(params: { to: string; name: string; rawToken: string }): Promise<void>;
+
   // RF21 — avisa al/los administrador(es) dueno que llego una solicitud de acceso nueva
   // para revisar, sin que tengan que entrar a chequear manualmente.
   sendNewAccessRequestAlert(params: { to: string; requesterName: string; requesterEmail: string }): Promise<void>;

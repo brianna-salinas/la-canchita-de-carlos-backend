@@ -35,7 +35,7 @@ export function makeRequestAdminRegistration(deps: {
       assertMaxLength(input.name, 150, "El nombre");
       email = normalizeEmail(input.email);
       assertValidEmail(email);
-      assertMinLength(input.password, 8, "La contrasena");
+      assertMinLength(input.password, 8, "La contraseña");
       if (input.phone) {
         assertValidPhone(input.phone);
         phone = normalizePhone(input.phone);
@@ -44,8 +44,11 @@ export function makeRequestAdminRegistration(deps: {
       throw new HttpError(400, (e as Error).message);
     }
 
+    // Si el correo pertenece a una cuenta desactivada (soft-delete), se deja pasar:
+    // al autorizar la solicitud se reactiva esa misma fila en vez de bloquear el
+    // registro para siempre por un email/username que ya nadie puede usar.
     const existingUser = await deps.users.findByEmail(email);
-    if (existingUser) {
+    if (existingUser && existingUser.status !== "INACTIVE") {
       throw new HttpError(409, "Ya existe una cuenta con ese correo.");
     }
     const existingRequest = await deps.accessRequests.findByEmailPending(email);

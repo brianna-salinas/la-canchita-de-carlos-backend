@@ -17,6 +17,7 @@ import { makeUpdateOwnEmail } from "../../application/updateOwnEmail.usecase.js"
 import { makeChangeOwnPassword } from "../../application/changeOwnPassword.usecase.js";
 import { makePromoteToOwner } from "../../application/promoteToOwner.usecase.js";
 import { makeUploadUserPhoto } from "../../application/uploadUserPhoto.usecase.js";
+import { makeRemoveUserPhoto } from "../../application/removeUserPhoto.usecase.js";
 import { makeDeactivateAdmin } from "../../application/deactivateAdmin.usecase.js";
 import { makeDeactivateOwnAccount } from "../../application/deactivateOwnAccount.usecase.js";
 import { makeUpdateOwnProfile } from "../../application/updateOwnProfile.usecase.js";
@@ -54,6 +55,7 @@ const updateOwnEmail = makeUpdateOwnEmail({ users: userRepository });
 const changeOwnPassword = makeChangeOwnPassword({ users: userRepository, sessions: sessionRepository });
 const promoteToOwner = makePromoteToOwner({ users: userRepository });
 const uploadUserPhoto = makeUploadUserPhoto({ users: userRepository, storage });
+const removeUserPhoto = makeRemoveUserPhoto({ users: userRepository });
 const deactivateAdmin = makeDeactivateAdmin({ users: userRepository });
 const deactivateOwnAccount = makeDeactivateOwnAccount({ users: userRepository, sessions: sessionRepository });
 const updateOwnProfile = makeUpdateOwnProfile({ users: userRepository });
@@ -211,6 +213,21 @@ usersRouter.post("/:id/foto", upload.single("foto"), async (req, res, next) => {
       return res.status(400).json({ error: "No se envio ninguna imagen." });
     }
     const user = await uploadUserPhoto(targetId, req.file);
+    res.status(200).json(await withSignedPhotoUrl(storage, sinPasswordHash(user)));
+  } catch (err) {
+    next(err);
+  }
+});
+
+// DELETE /users/:id/foto — quita la foto de perfil (vuelve a mostrar
+// iniciales). Misma regla de permisos que subirla.
+usersRouter.delete("/:id/foto", async (req, res, next) => {
+  try {
+    const targetId = Number(req.params.id);
+    if (targetId !== req.user!.userId && !req.user!.isOwner) {
+      throw new HttpError(403, "Solo puedes cambiar tu propia foto de perfil.");
+    }
+    const user = await removeUserPhoto(targetId);
     res.status(200).json(await withSignedPhotoUrl(storage, sinPasswordHash(user)));
   } catch (err) {
     next(err);

@@ -29,12 +29,6 @@ package "domain.ports" {
   }
 
   PanelRepository ..> PanelBookingSummary
-  note top of PanelBookingSummary
-    No es un aggregate propio:
-    proyeccion de solo lectura
-    sobre datos de Bookings/Payments
-    para el dashboard del dia.
-  end note
 }
 
 package "infrastructure.persistence" {

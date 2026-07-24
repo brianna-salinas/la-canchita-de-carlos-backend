@@ -1,0 +1,1 @@
+{"version":3,"file":"cancelBooking.usecase.js","sourceRoot":"","sources":["cancelBooking.usecase.ts"],"names":[],"mappings":"AAEA,iEAAiE;AACjE,MAAM,UAAU,iBAAiB,CAAC,IAAqC;IACrE,OAAO,SAAS,aAAa,CAAC,SAAiB;QAC7C,OAAO,IAAI,CAAC,QAAQ,CAAC,MAAM,CAAC,SAAS,CAAC,CAAC;IACzC,CAAC,CAAC;AACJ,CAAC"}

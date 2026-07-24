@@ -19,7 +19,7 @@ export function makeLogin(deps: { users: UserRepository; sessions: SessionReposi
     const usernameOrEmail = input.usernameOrEmail.trim();
     const user = await deps.users.findByUsernameOrEmail(usernameOrEmail);
     if (!user) {
-      throw new HttpError(401, "Usuario o contrasena incorrectos.");
+      throw new HttpError(401, "Usuario o contraseña incorrectos.");
     }
 
     try {
@@ -30,7 +30,7 @@ export function makeLogin(deps: { users: UserRepository; sessions: SessionReposi
 
     const validPassword = await verifyPassword(input.password, user.passwordHash);
     if (!validPassword) {
-      throw new HttpError(401, "Usuario o contrasena incorrectos.");
+      throw new HttpError(401, "Usuario o contraseña incorrectos.");
     }
 
     const accessToken = signAccessToken({ userId: user.id, isOwner: user.isOwner });

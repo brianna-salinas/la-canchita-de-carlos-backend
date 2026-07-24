@@ -58,7 +58,10 @@ package "domain.model" {
   class "Booking (funciones de dominio)" as BookingRules << (F,orchid) functions >> {
     +overlaps(candidate, existing): boolean
     +hasConflict(candidate, activeBookings, excludeId?): boolean
+    +resolvePaymentStatus(booking, newPaidAmount): PaymentStatus
     +assertValidRange(range): void
+    +assertWithinOperatingHours(range, court): void
+    +assertNotInPast(date, range): void
   }
 
   class Court {
@@ -68,10 +71,22 @@ package "domain.model" {
     +surface: string?
     +pricePerHour: number
     +photoUrl: string?
+    +status: CourtStatus
+    +enabled: boolean
+    +description: string?
+    +openTime: string?
+    +closeTime: string?
+  }
+
+  enum CourtStatus {
+    ACTIVE
+    MAINTENANCE
   }
 
   class "Court (funciones de dominio)" as CourtRules << (F,orchid) functions >> {
     +assertValidPrice(pricePerHour): void
+    +assertCourtAvailableForBooking(court): void
+    +assertValidOperatingHours(openTime, closeTime): void
   }
 
   class ScheduleBlock {
@@ -93,6 +108,7 @@ package "domain.model" {
   BookingRules ..> Booking : opera sobre
   CourtRules ..> Court : opera sobre
   ScheduleBlockRules ..> ScheduleBlock : opera sobre
+  Court ..> CourtStatus
 }
 
 package "domain.ports" {
@@ -111,15 +127,19 @@ package "domain.ports" {
   interface CourtRepository {
     +findByName(name): Promise<Court?>
     +create(data): Promise<Court>
+    +update(courtId, data): Promise<Court>
     +updatePrice(courtId, price): Promise<Court>
     +updatePhoto(courtId, photoUrl): Promise<Court>
+    +delete(courtId): Promise<void>
     +getConsolidatedAvailability(date): Promise<CourtAvailability[]>
+    +listAll(): Promise<Court[]>
     +findByIdOrThrow(courtId): Promise<Court>
   }
 
   interface ScheduleBlockRepository {
     +createMany(courtId, date, times, reason?): Promise<ScheduleBlock[]>
     +listForCourtAndDate(courtId, date): Promise<ScheduleBlock[]>
+    +listUpcomingForCourt(courtId, fromDate): Promise<ScheduleBlock[]>
     +deleteById(blockId): Promise<void>
   }
 
@@ -140,37 +160,10 @@ package "domain.ports" {
 }
 
 package "infrastructure.persistence" {
-  class PrismaBookingRepository {
-    +runTransaction(fn)
-    +findActiveOverlapCandidates(courtId, date)
-    +isTimeBlocked(courtId, date, range)
-    +createEmbeddedCustomer(data)
-    +create(data)
-    +update(bookingId, data)
-    +cancel(bookingId)
-    +findByIdOrThrow(bookingId)
-    +search(filters)
-  }
-
-  class PrismaCourtRepository {
-    +findByName(name)
-    +create(data)
-    +updatePrice(courtId, price)
-    +updatePhoto(courtId, photoUrl)
-    +getConsolidatedAvailability(date)
-    +findByIdOrThrow(courtId)
-  }
-
-  class PrismaScheduleBlockRepository {
-    +createMany(courtId, date, times, reason?)
-    +listForCourtAndDate(courtId, date)
-    +deleteById(blockId)
-  }
-
-  class PrismaAdminDirectory {
-    +listOtherActiveAdmins(excludeUserId?)
-    +findAdminNameOrThrow(userId)
-  }
+  class PrismaBookingRepository
+  class PrismaCourtRepository
+  class PrismaScheduleBlockRepository
+  class PrismaAdminDirectory
 
   PrismaBookingRepository ..|> BookingRepository
   PrismaCourtRepository ..|> CourtRepository
@@ -185,29 +178,46 @@ package "application (casos de uso)" {
   class cancelBooking << (F,orchid) factory >>
   class searchBookings << (F,orchid) factory >>
   class registerCourt << (F,orchid) factory >>
+  class updateCourt << (F,orchid) factory >>
   class updateCourtPrice << (F,orchid) factory >>
   class addCourtPhoto << (F,orchid) factory >>
+  class deleteCourt << (F,orchid) factory >>
+  class listCourts << (F,orchid) factory >>
   class getConsolidatedAvailability << (F,orchid) factory >>
   class blockSchedule << (F,orchid) factory >>
+  class blockScheduleSeries << (F,orchid) factory >>
   class listScheduleBlocks << (F,orchid) factory >>
+  class listUpcomingScheduleBlocks << (F,orchid) factory >>
   class unblockSchedule << (F,orchid) factory >>
 
   registerBooking ..> BookingRepository
   registerBooking ..> CourtRepository
   registerBooking ..> AdminDirectory
+  registerBooking ..> "NotificationSender / NotificationRepository (notifications)"
   registerBookingSeries ..> BookingRepository
   registerBookingSeries ..> CourtRepository
   registerBookingSeries ..> AdminDirectory
+  registerBookingSeries ..> "NotificationSender / NotificationRepository (notifications)"
   editBooking ..> BookingRepository
+  editBooking ..> CourtRepository
   cancelBooking ..> BookingRepository
   searchBookings ..> BookingRepository
   registerCourt ..> CourtRepository
+  updateCourt ..> CourtRepository
   updateCourtPrice ..> CourtRepository
   addCourtPhoto ..> CourtRepository
+  deleteCourt ..> CourtRepository
+  listCourts ..> CourtRepository
   getConsolidatedAvailability ..> CourtRepository
   blockSchedule ..> ScheduleBlockRepository
   blockSchedule ..> BookingRepository
+  blockScheduleSeries ..> ScheduleBlockRepository
+  blockScheduleSeries ..> BookingRepository
+  blockScheduleSeries ..> CourtRepository
+  blockScheduleSeries ..> AdminDirectory
+  blockScheduleSeries ..> "NotificationSender / NotificationRepository (notifications)"
   listScheduleBlocks ..> ScheduleBlockRepository
+  listUpcomingScheduleBlocks ..> ScheduleBlockRepository
   unblockSchedule ..> ScheduleBlockRepository
 }
 

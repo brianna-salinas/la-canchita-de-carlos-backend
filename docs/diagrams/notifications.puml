@@ -16,7 +16,7 @@ package "domain.model" {
 
   class Notification {
     +id: number
-    +userId: number
+    +userId: number?
     +type: NotificationType
     +title: string
     +message: string?
@@ -41,16 +41,10 @@ package "application.ports" {
     +sendBookingConfirmation(params): Promise<void>
     +sendAdminDecision(params): Promise<void>
     +sendEmailVerification(params): Promise<void>
+    +sendPasswordReset(params): Promise<void>
     +sendNewAccessRequestAlert(params): Promise<void>
     +sendNewBookingAlert(params): Promise<void>
   }
-
-  note right of NotificationSender
-    Puerto de correo (email).
-    Un fallo de envio nunca
-    bloquea al llamador
-    (RF23/RF24): todo retorna void.
-  end note
 }
 
 package "infrastructure" {
@@ -64,12 +58,18 @@ package "infrastructure" {
     +sendBookingConfirmation(params)
     +sendAdminDecision(params)
     +sendEmailVerification(params)
+    +sendPasswordReset(params)
     +sendNewAccessRequestAlert(params)
     +sendNewBookingAlert(params)
   }
 
+  class "renderEmailLayout()" as EmailTemplate << (F,orchid) function >> {
+    +heading, bodyHtml, cta -> HTML de marca
+  }
+
   PrismaNotificationRepository ..|> NotificationRepository
   ResendNotificationSender ..|> NotificationSender
+  ResendNotificationSender ..> EmailTemplate : usa para cada correo
 }
 
 package "application (casos de uso)" {
@@ -79,11 +79,5 @@ package "application (casos de uso)" {
   listMyNotifications ..> NotificationRepository
   markNotificationRead ..> NotificationRepository
 }
-
-note bottom
-  NotificationRepository = in-app (persistido en tabla notifications).
-  NotificationSender = correo (Resend). Son dos puertos distintos
-  que otros contextos (bookings, identity) consumen juntos.
-end note
 
 @enduml

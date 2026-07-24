@@ -52,14 +52,7 @@ package "domain.ports" {
 }
 
 package "infrastructure.persistence" {
-  class PrismaCustomerRepository {
-    +create(data)
-    +update(customerId, data)
-    +deactivate(customerId)
-    +list(search?)
-    +getBookingHistory(customerId)
-    +updatePhoto(customerId, photoUrl)
-  }
+  class PrismaCustomerRepository
 
   PrismaCustomerRepository ..|> CustomerRepository
 }
@@ -72,12 +65,18 @@ package "application (casos de uso)" {
   class getCustomerHistory << (F,orchid) factory >>
   class uploadCustomerPhoto << (F,orchid) factory >>
 
+  interface "FileStorage (platform)" as FileStorage {
+    +upload(input): Promise<UploadResult>
+    +createSignedUrl(path, expiresInSeconds): Promise<string>
+  }
+
   registerCustomer ..> CustomerRepository
   updateCustomer ..> CustomerRepository
   deactivateCustomer ..> CustomerRepository
   listCustomers ..> CustomerRepository
   getCustomerHistory ..> CustomerRepository
   uploadCustomerPhoto ..> CustomerRepository
+  uploadCustomerPhoto ..> FileStorage
 }
 
 @enduml

@@ -1,0 +1,1 @@
+{"version":3,"file":"getCustomerHistory.usecase.js","sourceRoot":"","sources":["getCustomerHistory.usecase.ts"],"names":[],"mappings":"AAEA,gDAAgD;AAChD,MAAM,UAAU,sBAAsB,CAAC,IAAuC;IAC5E,OAAO,SAAS,kBAAkB,CAAC,UAAkB;QACnD,OAAO,IAAI,CAAC,SAAS,CAAC,iBAAiB,CAAC,UAAU,CAAC,CAAC;IACtD,CAAC,CAAC;AACJ,CAAC"}

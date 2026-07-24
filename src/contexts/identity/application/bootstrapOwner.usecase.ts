@@ -32,7 +32,7 @@ export function makeBootstrapOwner(deps: { users: UserRepository }) {
       assertNonEmpty(input.username, "El nombre de usuario");
       email = normalizeEmail(input.email);
       assertValidEmail(email);
-      assertMinLength(input.password, 8, "La contrasena");
+      assertMinLength(input.password, 8, "La contraseña");
     } catch (e) {
       throw new HttpError(400, (e as Error).message);
     }

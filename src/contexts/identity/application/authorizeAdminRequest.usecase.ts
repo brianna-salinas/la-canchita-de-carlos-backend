@@ -23,13 +23,24 @@ export function makeAuthorizeAdminRequest(deps: {
       throw new HttpError(409, (e as Error).message);
     }
 
-    const user = await deps.users.create({
-      name: request.name,
-      username: usernameFromEmail(request.email),
-      email: request.email,
-      passwordHash: request.passwordHash,
-      status: "PENDING_VERIFICATION",
-    });
+    // Si el correo de la solicitud pertenece a una cuenta previamente
+    // desactivada, se reactiva esa misma fila (mismo id/username, conserva su
+    // historial de reservas/notificaciones) en vez de crear un usuario nuevo —
+    // el email/username son unicos en la base, un create() aqui chocaria.
+    const existingInactiveUser = await deps.users.findByEmail(request.email);
+    const user =
+      existingInactiveUser && existingInactiveUser.status === "INACTIVE"
+        ? await deps.users.reactivate(existingInactiveUser.id, {
+            name: request.name,
+            passwordHash: request.passwordHash,
+          })
+        : await deps.users.create({
+            name: request.name,
+            username: usernameFromEmail(request.email),
+            email: request.email,
+            passwordHash: request.passwordHash,
+            status: "PENDING_VERIFICATION",
+          });
 
     await deps.accessRequests.markApproved(requestId, user.id);
 

@@ -71,8 +71,15 @@ export class PrismaUserRepository implements UserRepository {
     return owners.map((o) => o.email);
   }
 
-  async updatePhoto(userId: number, photoUrl: string): Promise<User> {
+  async updatePhoto(userId: number, photoUrl: string | null): Promise<User> {
     return prisma.user.update({ where: { id: userId }, data: { photoUrl } });
+  }
+
+  async reactivate(userId: number, data: { name: string; passwordHash: string }): Promise<User> {
+    return prisma.user.update({
+      where: { id: userId },
+      data: { name: data.name, passwordHash: data.passwordHash, status: "PENDING_VERIFICATION" },
+    });
   }
 }
 

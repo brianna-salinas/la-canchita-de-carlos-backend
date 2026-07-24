@@ -41,7 +41,9 @@ package "domain.model" {
     +phone: string?
     +passwordHash: string
     +status: AccessRequestStatus
+    +createdUserId: number?
     +createdAt: Date
+    +resolvedAt: Date?
   }
 
   class "AccessRequest (funciones de dominio)" as AccessRequestRules << (F,orchid) functions >> {
@@ -55,10 +57,18 @@ package "domain.model" {
     +expiresAt: Date
   }
 
+  class PasswordResetToken {
+    +id: number
+    +userId: number
+    +used: boolean
+    +expiresAt: Date
+  }
+
   UserRules ..> User
   AccessRequestRules ..> AccessRequest
-  AccessRequest ..> User : crea, al aprobarse
+  AccessRequest ..> User : crea o reactiva, al aprobarse
   EmailVerificationToken "*" --> "1" User : userId
+  PasswordResetToken "*" --> "1" User : userId
 }
 
 package "domain.ports" {
@@ -70,12 +80,15 @@ package "domain.ports" {
     +create(data): Promise<User>
     +promoteToOwner(userId): Promise<User>
     +activate(userId): Promise<User>
+    +deactivate(userId): Promise<User>
     +updateLastAccess(userId): Promise<void>
     +updateEmail(userId, email): Promise<User>
     +updatePasswordHash(userId, hash): Promise<void>
+    +updateProfile(userId, data): Promise<User>
     +listActiveAdmins(): Promise<User[]>
     +listOwnerEmails(): Promise<string[]>
     +updatePhoto(userId, photoUrl): Promise<User>
+    +reactivate(userId, data): Promise<User>
   }
 
   interface AccessRequestRepository {
@@ -99,9 +112,16 @@ package "domain.ports" {
     +markUsedAndActivateUser(tokenId, userId): Promise<void>
   }
 
+  interface PasswordResetTokenRepository {
+    +create(data): Promise<void>
+    +findByTokenHash(tokenHash): Promise<PasswordResetToken?>
+    +markUsedAndUpdatePassword(tokenId, userId, passwordHash): Promise<void>
+  }
+
   UserRepository ..> User
   AccessRequestRepository ..> AccessRequest
   EmailVerificationTokenRepository ..> EmailVerificationToken
+  PasswordResetTokenRepository ..> PasswordResetToken
 }
 
 package "infrastructure.persistence" {
@@ -109,17 +129,21 @@ package "infrastructure.persistence" {
   class PrismaAccessRequestRepository
   class PrismaSessionRepository
   class PrismaEmailVerificationTokenRepository
+  class PrismaPasswordResetTokenRepository
 
   PrismaUserRepository ..|> UserRepository
   PrismaAccessRequestRepository ..|> AccessRequestRepository
   PrismaSessionRepository ..|> SessionRepository
   PrismaEmailVerificationTokenRepository ..|> EmailVerificationTokenRepository
+  PrismaPasswordResetTokenRepository ..|> PasswordResetTokenRepository
 }
 
 package "application (casos de uso)" {
   class login << (F,orchid) factory >>
   class logout << (F,orchid) factory >>
   class bootstrapOwner << (F,orchid) factory >>
+  class requestPasswordReset << (F,orchid) factory >>
+  class resetPassword << (F,orchid) factory >>
   class promoteToOwner << (F,orchid) factory >>
   class requestAdminRegistration << (F,orchid) factory >>
   class authorizeAdminRequest << (F,orchid) factory >>
@@ -128,27 +152,44 @@ package "application (casos de uso)" {
   class listPendingRequests << (F,orchid) factory >>
   class listActiveAdmins << (F,orchid) factory >>
   class updateOwnEmail << (F,orchid) factory >>
+  class updateOwnProfile << (F,orchid) factory >>
   class changeOwnPassword << (F,orchid) factory >>
   class uploadUserPhoto << (F,orchid) factory >>
+  class removeUserPhoto << (F,orchid) factory >>
+  class deactivateAdmin << (F,orchid) factory >>
+  class deactivateOwnAccount << (F,orchid) factory >>
 
   login ..> UserRepository
   login ..> SessionRepository
   logout ..> SessionRepository
   bootstrapOwner ..> UserRepository
+  requestPasswordReset ..> UserRepository
+  requestPasswordReset ..> PasswordResetTokenRepository
+  requestPasswordReset ..> "NotificationSender (notifications)"
+  resetPassword ..> PasswordResetTokenRepository
+  resetPassword ..> SessionRepository
   promoteToOwner ..> UserRepository
   requestAdminRegistration ..> UserRepository
   requestAdminRegistration ..> AccessRequestRepository
+  requestAdminRegistration ..> "NotificationSender (notifications)"
   authorizeAdminRequest ..> UserRepository
   authorizeAdminRequest ..> AccessRequestRepository
   authorizeAdminRequest ..> EmailVerificationTokenRepository
+  authorizeAdminRequest ..> "NotificationSender (notifications)"
   rejectAdminRequest ..> AccessRequestRepository
+  rejectAdminRequest ..> "NotificationSender (notifications)"
   verifyEmail ..> EmailVerificationTokenRepository
   listPendingRequests ..> AccessRequestRepository
   listActiveAdmins ..> UserRepository
   updateOwnEmail ..> UserRepository
+  updateOwnProfile ..> UserRepository
   changeOwnPassword ..> UserRepository
   changeOwnPassword ..> SessionRepository
   uploadUserPhoto ..> UserRepository
+  removeUserPhoto ..> UserRepository
+  deactivateAdmin ..> UserRepository
+  deactivateOwnAccount ..> UserRepository
+  deactivateOwnAccount ..> SessionRepository
 }
 
 @enduml
