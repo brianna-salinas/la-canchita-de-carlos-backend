@@ -190,6 +190,12 @@ package "application (casos de uso)" {
   class listUpcomingScheduleBlocks << (F,orchid) factory >>
   class unblockSchedule << (F,orchid) factory >>
 
+  interface "FileStorage (platform)" as FileStorage {
+    +upload(input): Promise<UploadResult>
+    +createSignedUrl(path, expiresInSeconds): Promise<string>
+    +delete(path): Promise<void>
+  }
+
   registerBooking ..> BookingRepository
   registerBooking ..> CourtRepository
   registerBooking ..> AdminDirectory
@@ -206,6 +212,7 @@ package "application (casos de uso)" {
   updateCourt ..> CourtRepository
   updateCourtPrice ..> CourtRepository
   addCourtPhoto ..> CourtRepository
+  addCourtPhoto ..> FileStorage
   deleteCourt ..> CourtRepository
   listCourts ..> CourtRepository
   getConsolidatedAvailability ..> CourtRepository

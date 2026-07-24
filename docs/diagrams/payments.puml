@@ -68,6 +68,7 @@ package "application" {
   interface "FileStorage (platform)" as FileStorage {
     +upload(input): Promise<UploadResult>
     +createSignedUrl(path, expiresInSeconds): Promise<string>
+    +delete(path): Promise<void>
   }
 
   registerPayment ..> PaymentRepository

@@ -159,6 +159,12 @@ package "application (casos de uso)" {
   class deactivateAdmin << (F,orchid) factory >>
   class deactivateOwnAccount << (F,orchid) factory >>
 
+  interface "FileStorage (platform)" as FileStorage {
+    +upload(input): Promise<UploadResult>
+    +createSignedUrl(path, expiresInSeconds): Promise<string>
+    +delete(path): Promise<void>
+  }
+
   login ..> UserRepository
   login ..> SessionRepository
   logout ..> SessionRepository
@@ -186,7 +192,9 @@ package "application (casos de uso)" {
   changeOwnPassword ..> UserRepository
   changeOwnPassword ..> SessionRepository
   uploadUserPhoto ..> UserRepository
+  uploadUserPhoto ..> FileStorage
   removeUserPhoto ..> UserRepository
+  removeUserPhoto ..> FileStorage
   deactivateAdmin ..> UserRepository
   deactivateOwnAccount ..> UserRepository
   deactivateOwnAccount ..> SessionRepository
