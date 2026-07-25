@@ -13,7 +13,7 @@ services:
       - key: JWT_SECRET
         sync: false
       - key: JWT_EXPIRES_IN
-        value: 8h
+        value: 1h
       - key: SETUP_TOKEN
         sync: false
       - key: RESEND_API_KEY
