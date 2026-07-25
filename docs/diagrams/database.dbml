@@ -1,6 +1,3 @@
-// La Canchita de Carlos — Diagrama de base de datos
-// Generado a partir de prisma/schema.prisma
-// Pega este contenido en https://dbdiagram.io (Import > DBML, o pegar directo en el editor)
 
 Enum user_status_enum {
   ACTIVE
