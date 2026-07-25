@@ -1,0 +1,196 @@
+// La Canchita de Carlos — Diagrama de base de datos
+// Generado a partir de prisma/schema.prisma
+// Pega este contenido en https://dbdiagram.io (Import > DBML, o pegar directo en el editor)
+
+Enum user_status_enum {
+  ACTIVE
+  INACTIVE
+  PENDING_VERIFICATION
+}
+
+Enum request_status_enum {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+Enum court_status_enum {
+  ACTIVE
+  MAINTENANCE
+}
+
+Enum customer_status_enum {
+  ACTIVE
+  INACTIVE
+}
+
+Enum booking_status_enum {
+  BOOKED
+  CANCELLED
+  COMPLETED
+}
+
+Enum payment_status_enum {
+  PENDING
+  PARTIAL
+  PAID
+}
+
+Enum booking_type_enum {
+  SINGLE
+  MULTIDAY
+  RECURRING
+}
+
+Enum series_payment_mode_enum {
+  INDIVIDUAL
+  LUMP_SUM
+}
+
+Enum notification_type_enum {
+  ACCESS_REQUEST
+  PAYMENT_PENDING
+  NEW_BOOKING
+  BOOKING_CANCELLED
+  COURT_MAINTENANCE
+  GENERAL
+}
+
+Table users {
+  usu_id integer [pk, increment]
+  usu_name varchar(150)
+  usu_username varchar(60) [unique]
+  usu_email varchar(150) [unique]
+  usu_password_hash varchar(255)
+  usu_is_owner boolean [default: false]
+  usu_status user_status_enum [default: 'ACTIVE']
+  usu_photo_url text [null, note: 'ruta del archivo en Supabase Storage']
+  usu_last_access timestamptz [null]
+  usu_created_at timestamptz [default: `now()`]
+  usu_updated_at timestamptz [default: `now()`]
+}
+
+Table sessions {
+  ses_id integer [pk, increment]
+  ses_user_id integer [ref: > users.usu_id]
+  ses_token_hash varchar(255) [unique]
+  ses_ip_address varchar(45) [null]
+  ses_user_agent text [null]
+  ses_created_at timestamptz [default: `now()`]
+  ses_expires_at timestamptz
+  ses_revoked boolean [default: false]
+}
+
+Table password_reset_tokens {
+  prt_id integer [pk, increment]
+  prt_user_id integer [ref: > users.usu_id]
+  prt_token_hash varchar(255) [unique]
+  prt_expires_at timestamptz
+  prt_used boolean [default: false]
+  prt_created_at timestamptz [default: `now()`]
+}
+
+Table email_verification_tokens {
+  evt_id integer [pk, increment]
+  evt_user_id integer [ref: > users.usu_id]
+  evt_token_hash varchar(255) [unique]
+  evt_expires_at timestamptz
+  evt_used boolean [default: false]
+  evt_created_at timestamptz [default: `now()`]
+}
+
+Table access_requests {
+  req_id integer [pk, increment]
+  req_name varchar(150)
+  req_email varchar(150)
+  req_phone varchar(30) [null]
+  req_password_hash varchar(255)
+  req_status request_status_enum [default: 'PENDING']
+  req_created_user_id integer [null, ref: > users.usu_id]
+  req_created_at timestamptz [default: `now()`]
+  req_resolved_at timestamptz [null]
+}
+
+Table courts {
+  cou_id integer [pk, increment]
+  cou_name varchar(100)
+  cou_sport varchar(50)
+  cou_surface varchar(80) [null]
+  cou_price_per_hour decimal(10,2)
+  cou_status court_status_enum [default: 'ACTIVE']
+  cou_enabled boolean [default: true]
+  cou_photo_url text [null, note: 'ruta del archivo en Supabase Storage']
+  cou_description text [null]
+  cou_open_time varchar(5) [null]
+  cou_close_time varchar(5) [null]
+  cou_created_at timestamptz [default: `now()`]
+  cou_updated_at timestamptz [default: `now()`]
+}
+
+Table schedule_blocks {
+  blo_id integer [pk, increment]
+  blo_court_id integer [ref: > courts.cou_id]
+  blo_date date
+  blo_time time
+  blo_reason varchar(200) [null]
+  blo_created_at timestamptz [default: `now()`]
+
+  note: 'onDelete: Cascade al eliminar la cancha'
+}
+
+Table customers {
+  cus_id integer [pk, increment]
+  cus_name varchar(150)
+  cus_phone varchar(30)
+  cus_document_number varchar(20) [unique, null]
+  cus_status customer_status_enum [default: 'ACTIVE']
+  cus_created_at timestamptz [default: `now()`]
+  cus_updated_at timestamptz [default: `now()`]
+}
+
+Table bookings {
+  boo_id integer [pk, increment]
+  boo_court_id integer [ref: > courts.cou_id]
+  boo_customer_id integer [null, ref: > customers.cus_id]
+  boo_customer_name varchar(150)
+  boo_type varchar(80) [null]
+  boo_date date
+  boo_start_time time
+  boo_end_time time
+  boo_status booking_status_enum [default: 'BOOKED']
+  boo_payment_status payment_status_enum [default: 'PENDING']
+  boo_total_amount decimal(10,2) [default: 0]
+  boo_paid_amount decimal(10,2) [default: 0]
+  boo_booking_type booking_type_enum [default: 'SINGLE']
+  boo_series_id uuid [null, note: 'agrupa reservas multidia/recurrentes de una misma serie']
+  boo_series_payment_mode series_payment_mode_enum [null]
+  boo_series_label varchar(200) [null]
+  boo_series_total_dates integer [null]
+  boo_series_index integer [null]
+  boo_receipt_url text [null, note: 'ruta del comprobante en Supabase Storage']
+  boo_created_at timestamptz [default: `now()`]
+  boo_updated_at timestamptz [default: `now()`]
+
+  note: 'onDelete: Cascade al eliminar la cancha'
+}
+
+Table payments {
+  pay_id integer [pk, increment]
+  pay_booking_id integer [ref: > bookings.boo_id]
+  pay_amount decimal(10,2)
+  pay_method varchar(30) [note: 'EFECTIVO | YAPE | OTRO']
+  pay_created_at timestamptz [default: `now()`]
+
+  note: 'onDelete: Cascade al eliminar la reserva'
+}
+
+Table notifications {
+  ntf_id integer [pk, increment]
+  ntf_user_id integer [null, ref: > users.usu_id]
+  ntf_type notification_type_enum [default: 'GENERAL']
+  ntf_title varchar(150)
+  ntf_message text [null]
+  ntf_link_url varchar(200) [null]
+  ntf_read boolean [default: false]
+  ntf_created_at timestamptz [default: `now()`]
+}
