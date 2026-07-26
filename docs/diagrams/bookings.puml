@@ -207,6 +207,7 @@ package "application (casos de uso)" {
   editBooking ..> BookingRepository
   editBooking ..> CourtRepository
   cancelBooking ..> BookingRepository
+  cancelBooking ..> "PaymentRepository (payments)"
   searchBookings ..> BookingRepository
   registerCourt ..> CourtRepository
   updateCourt ..> CourtRepository

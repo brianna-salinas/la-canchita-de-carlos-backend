@@ -4,6 +4,7 @@ import type { CustomWorld } from "../support/world.js";
 import { makeRegisterPayment } from "../../src/contexts/payments/application/registerPayment.usecase.js";
 import { makeAttachReceipt } from "../../src/contexts/payments/application/attachReceipt.usecase.js";
 import { makeGetReceiptSignedUrl } from "../../src/contexts/payments/application/getReceiptSignedUrl.usecase.js";
+import { makeCancelBooking } from "../../src/contexts/bookings/application/cancelBooking.usecase.js";
 import { HttpError } from "../../src/platform/errors/HttpError.js";
 
 const VALID_METHODS = ["EFECTIVO", "YAPE", "OTRO"];
@@ -15,6 +16,23 @@ Given("a booking exists with id {int}, total amount {int}, and paid amount {int}
   paid: number
 ) {
   this.payments.seedBooking(id, total, paid);
+  // Tambien se refleja en el repositorio de reservas: cancelBooking necesita
+  // encontrar la reserva ahi para poder marcarla como CANCELLED.
+  this.bookings.bookings.push({
+    id,
+    courtId: 1,
+    customerId: null,
+    customerName: "Cliente de prueba",
+    type: null,
+    date: new Date("2026-01-01"),
+    startTime: new Date("2026-01-01T10:00:00Z"),
+    endTime: new Date("2026-01-01T11:00:00Z"),
+    status: "BOOKED",
+    totalAmount: total,
+    paidAmount: paid,
+    paymentStatus: "PENDING",
+    receiptUrl: null,
+  });
 });
 
 Given("booking {int} already has a paid amount of {int}", async function (this: CustomWorld, id: number, paid: number) {
@@ -69,6 +87,14 @@ When("the administrator tries to register a payment of {int} for booking {int}",
   }
 });
 
+When("the administrator cancels booking {int}", async function (this: CustomWorld, bookingId: number) {
+  const cancelBooking = makeCancelBooking({ bookings: this.bookings, payments: this.payments });
+  await cancelBooking(bookingId);
+  // Se relee del repositorio de pagos (no del de reservas) porque es ahi
+  // donde reverseAllForBooking reinicia paidAmount/paymentStatus.
+  this.lastResult = { booking: await this.payments.findBookingOrThrow(bookingId) };
+});
+
 When("the administrator uploads a receipt image for booking {int}", async function (this: CustomWorld, bookingId: number) {
   const attachReceipt = makeAttachReceipt({ payments: this.payments, storage: this.storage });
   this.lastResult = await attachReceipt(bookingId, { buffer: Buffer.from("fake-image"), mimetype: "image/jpeg", originalname: "receipt.jpg" });
@@ -100,6 +126,16 @@ Then("the booking's payment status becomes {string}", async function (this: Cust
 Then("the system rejects the payment because it exceeds the booking's total amount", async function (this: CustomWorld) {
   assert.ok(this.lastError);
   assert.equal(this.lastError!.status, 400);
+});
+
+Then("the payment of {int} for booking {int} is marked as reversed", async function (
+  this: CustomWorld,
+  amount: number,
+  bookingId: number
+) {
+  const payment = this.payments.payments.find((p) => p.bookingId === bookingId && p.amount === amount);
+  assert.ok(payment, `No se encontro un pago de ${amount} para la reserva ${bookingId}`);
+  assert.ok(payment!.reversedAt !== null, "El pago deberia estar marcado como reversado (reversedAt no nulo)");
 });
 
 Then("the booking's paid amount does not change", async function (this: CustomWorld) {

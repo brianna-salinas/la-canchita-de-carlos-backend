@@ -19,7 +19,7 @@ notificationsRouter.get("/", async (req, res, next) => {
   }
 });
 
-notificationsRouter.patch("/:id/leida", async (req, res, next) => {
+notificationsRouter.patch("/:id/read", async (req, res, next) => {
   try {
     await markNotificationRead(Number(req.params.id));
     res.status(204).send();

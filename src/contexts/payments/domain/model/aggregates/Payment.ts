@@ -9,6 +9,7 @@ export interface Payment {
   amount: number;
   method: PaymentMethod;
   createdAt: Date;
+  reversedAt: Date | null;
 }
 
 export interface PayableBooking {
@@ -25,4 +26,8 @@ export function assertAmountWithinTotal(booking: PayableBooking, amountToAdd: nu
 
 export function resolveStatus(booking: PayableBooking, newPaidAmount: number): "PAID" | "PARTIAL" {
   return newPaidAmount >= booking.totalAmount ? "PAID" : "PARTIAL";
+}
+
+export function isReversed(payment: Payment): boolean {
+  return payment.reversedAt !== null;
 }

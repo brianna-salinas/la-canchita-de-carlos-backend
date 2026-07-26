@@ -12,27 +12,27 @@ const getPendingPaymentsToday = makeGetPendingPaymentsToday({ panel: panelReposi
 export const panelRouter = Router();
 panelRouter.use(requireAuth);
 
-panelRouter.get("/alquileres-del-dia", async (req, res, next) => {
+panelRouter.get("/todays-bookings", async (req, res, next) => {
   try {
-    const data = await getBookingsToday(req.query.fecha as string | undefined);
+    const data = await getBookingsToday(req.query.date as string | undefined);
     res.status(200).json(data);
   } catch (err) {
     next(err);
   }
 });
 
-panelRouter.get("/ingreso-del-dia", async (req, res, next) => {
+panelRouter.get("/todays-revenue", async (req, res, next) => {
   try {
-    const data = await getIncomeToday(req.query.fecha as string | undefined);
+    const data = await getIncomeToday(req.query.date as string | undefined);
     res.status(200).json(data);
   } catch (err) {
     next(err);
   }
 });
 
-panelRouter.get("/pendientes-del-dia", async (req, res, next) => {
+panelRouter.get("/todays-pending-payments", async (req, res, next) => {
   try {
-    const data = await getPendingPaymentsToday(req.query.fecha as string | undefined);
+    const data = await getPendingPaymentsToday(req.query.date as string | undefined);
     res.status(200).json(data);
   } catch (err) {
     next(err);

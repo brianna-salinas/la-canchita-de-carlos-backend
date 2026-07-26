@@ -315,7 +315,7 @@ export class FakePaymentRepository implements PaymentRepository {
 
   async registerPaymentAtomic(bookingId: number, amount: number, method: PaymentMethod, newPaidAmount: number, status: "PARTIAL" | "PAID") {
     const booking = this.bookings.get(bookingId)!;
-    const payment: Payment = { id: this.nextId++, bookingId, amount, method, createdAt: new Date() };
+    const payment: Payment = { id: this.nextId++, bookingId, amount, method, createdAt: new Date(), reversedAt: null };
     this.payments.push(payment);
     booking.paidAmount = newPaidAmount;
     (booking as any).paymentStatus = status;
@@ -334,6 +334,20 @@ export class FakePaymentRepository implements PaymentRepository {
 
   async getReceiptPath(bookingId: number): Promise<string | null> {
     return this.bookings.get(bookingId)?.receiptPath ?? null;
+  }
+
+  async reverseAllForBooking(bookingId: number): Promise<{ booking: PayableBooking; reversedCount: number }> {
+    const booking = this.bookings.get(bookingId)!;
+    let reversedCount = 0;
+    for (const p of this.payments) {
+      if (p.bookingId === bookingId && p.reversedAt === null) {
+        p.reversedAt = new Date();
+        reversedCount++;
+      }
+    }
+    booking.paidAmount = 0;
+    (booking as any).paymentStatus = "PENDING";
+    return { booking, reversedCount };
   }
 }
 

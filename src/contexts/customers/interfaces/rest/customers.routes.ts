@@ -52,7 +52,7 @@ customersRouter.delete("/:id", async (req, res, next) => {
   }
 });
 
-customersRouter.get("/:id/historial", async (req, res, next) => {
+customersRouter.get("/:id/history", async (req, res, next) => {
   try {
     const history = await getCustomerHistory(Number(req.params.id));
     res.status(200).json(history);

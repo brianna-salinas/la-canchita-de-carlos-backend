@@ -46,3 +46,10 @@ Feature: Payment registration and receipts
     Given booking 1 has no receipt attached
     When the administrator requests to view the receipt for booking 1
     Then the system responds with a 404 error "This booking has no receipt attached."
+
+  Scenario: Cancelling a booking reverses its payment
+    Given the administrator registers a payment of 2000 with method "YAPE" for booking 1
+    When the administrator cancels booking 1
+    Then the booking's paid amount becomes 0
+    And the booking's payment status becomes "PENDING"
+    And the payment of 2000 for booking 1 is marked as reversed

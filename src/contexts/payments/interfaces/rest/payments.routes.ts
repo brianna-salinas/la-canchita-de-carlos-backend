@@ -43,7 +43,7 @@ paymentsRouter.get("/:bookingId", async (req, res, next) => {
   }
 });
 
-paymentsRouter.post("/:bookingId/comprobante", upload.single("comprobante"), async (req, res, next) => {
+paymentsRouter.post("/:bookingId/receipt", upload.single("receipt"), async (req, res, next) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: "No se envio ningun comprobante." });
@@ -55,7 +55,7 @@ paymentsRouter.post("/:bookingId/comprobante", upload.single("comprobante"), asy
   }
 });
 
-paymentsRouter.get("/:bookingId/comprobante", async (req, res, next) => {
+paymentsRouter.get("/:bookingId/receipt", async (req, res, next) => {
   try {
     const result = await getReceiptSignedUrl(Number(req.params.bookingId));
     res.status(200).json(result);

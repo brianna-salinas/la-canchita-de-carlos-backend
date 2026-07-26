@@ -209,11 +209,12 @@ model Customer {
 }
 
 model Payment {
-  id        Int      @id @default(autoincrement()) @map("pay_id")
-  bookingId Int      @map("pay_booking_id")
-  amount    Decimal  @map("pay_amount") @db.Decimal(10, 2)
-  method    String   @map("pay_method") @db.VarChar(30)
-  createdAt DateTime @default(now()) @map("pay_created_at") @db.Timestamptz()
+  id         Int       @id @default(autoincrement()) @map("pay_id")
+  bookingId  Int       @map("pay_booking_id")
+  amount     Decimal   @map("pay_amount") @db.Decimal(10, 2)
+  method     String    @map("pay_method") @db.VarChar(30)
+  createdAt  DateTime  @default(now()) @map("pay_created_at") @db.Timestamptz()
+  reversedAt DateTime? @map("pay_reversed_at") @db.Timestamptz()
 
   booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
 

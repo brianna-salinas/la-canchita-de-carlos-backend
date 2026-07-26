@@ -59,7 +59,7 @@ const updateOwnProfile = makeUpdateOwnProfile({ users: userRepository });
 
 export const usersRouter = Router();
 
-usersRouter.post("/solicitudes", async (req, res, next) => {
+usersRouter.post("/requests", async (req, res, next) => {
   try {
     const request = await requestAdminRegistration(req.body);
     res.status(201).json(request);
@@ -68,7 +68,7 @@ usersRouter.post("/solicitudes", async (req, res, next) => {
   }
 });
 
-usersRouter.get("/verificar", async (req, res, next) => {
+usersRouter.get("/verify", async (req, res, next) => {
   try {
     const result = await verifyEmail(String(req.query.token));
     res.status(200).json(result);
@@ -79,7 +79,7 @@ usersRouter.get("/verificar", async (req, res, next) => {
 
 usersRouter.use(requireAuth);
 
-usersRouter.get("/solicitudes", requireOwner, async (_req, res, next) => {
+usersRouter.get("/requests", requireOwner, async (_req, res, next) => {
   try {
     const requests = await listPendingRequests();
     res.status(200).json(requests);
@@ -88,7 +88,7 @@ usersRouter.get("/solicitudes", requireOwner, async (_req, res, next) => {
   }
 });
 
-usersRouter.patch("/solicitudes/:id/autorizar", requireOwner, async (req, res, next) => {
+usersRouter.patch("/requests/:id/approve", requireOwner, async (req, res, next) => {
   try {
     const result = await authorizeAdminRequest(Number(req.params.id));
     res.status(200).json(result);
@@ -97,7 +97,7 @@ usersRouter.patch("/solicitudes/:id/autorizar", requireOwner, async (req, res, n
   }
 });
 
-usersRouter.patch("/solicitudes/:id/rechazar", requireOwner, async (req, res, next) => {
+usersRouter.patch("/requests/:id/reject", requireOwner, async (req, res, next) => {
   try {
     const result = await rejectAdminRequest(Number(req.params.id));
     res.status(200).json(result);
@@ -106,7 +106,7 @@ usersRouter.patch("/solicitudes/:id/rechazar", requireOwner, async (req, res, ne
   }
 });
 
-usersRouter.patch("/:id/promover-dueno", requireOwner, async (req, res, next) => {
+usersRouter.patch("/:id/promote-owner", requireOwner, async (req, res, next) => {
   try {
     const result = await promoteToOwner(Number(req.params.id));
     res.status(200).json(result);
@@ -133,7 +133,7 @@ usersRouter.get("/me", async (req, res, next) => {
   }
 });
 
-usersRouter.patch("/me/correo", async (req, res, next) => {
+usersRouter.patch("/me/email", async (req, res, next) => {
   try {
     const result = await updateOwnEmail(req.user!.userId, req.body.email);
     res.status(200).json(result);
@@ -142,7 +142,7 @@ usersRouter.patch("/me/correo", async (req, res, next) => {
   }
 });
 
-usersRouter.patch("/me/contrasena", async (req, res, next) => {
+usersRouter.patch("/me/password", async (req, res, next) => {
   try {
     const result = await changeOwnPassword(req.user!.userId, req.body.currentPassword, req.body.newPassword);
     res.status(200).json(result);
@@ -151,7 +151,7 @@ usersRouter.patch("/me/contrasena", async (req, res, next) => {
   }
 });
 
-usersRouter.patch("/me/perfil", async (req, res, next) => {
+usersRouter.patch("/me/profile", async (req, res, next) => {
   try {
     const result = await updateOwnProfile(req.user!.userId, req.body);
     res.status(200).json(result);
@@ -178,7 +178,7 @@ usersRouter.delete("/:id", requireOwner, async (req, res, next) => {
   }
 });
 
-usersRouter.post("/:id/foto", upload.single("foto"), async (req, res, next) => {
+usersRouter.post("/:id/photo", upload.single("photo"), async (req, res, next) => {
   try {
     const targetId = Number(req.params.id);
     if (targetId !== req.user!.userId && !req.user!.isOwner) {
@@ -194,7 +194,7 @@ usersRouter.post("/:id/foto", upload.single("foto"), async (req, res, next) => {
   }
 });
 
-usersRouter.delete("/:id/foto", async (req, res, next) => {
+usersRouter.delete("/:id/photo", async (req, res, next) => {
   try {
     const targetId = Number(req.params.id);
     if (targetId !== req.user!.userId && !req.user!.isOwner) {

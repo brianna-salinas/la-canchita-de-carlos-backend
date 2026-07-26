@@ -5,6 +5,7 @@ import { courtRepository } from "../../infrastructure/persistence/repositories/P
 import { notificationSender } from "../../../notifications/infrastructure/email/ResendNotificationSender.js";
 import { notificationRepository } from "../../../notifications/infrastructure/persistence/repositories/PrismaNotificationRepository.js";
 import { adminDirectory } from "../../infrastructure/persistence/repositories/PrismaAdminDirectory.js";
+import { paymentRepository } from "../../../payments/infrastructure/persistence/repositories/PrismaPaymentRepository.js";
 import { makeRegisterBooking } from "../../application/registerBooking.usecase.js";
 import { makeEditBooking } from "../../application/editBooking.usecase.js";
 import { makeCancelBooking } from "../../application/cancelBooking.usecase.js";
@@ -20,7 +21,7 @@ const registerBooking = makeRegisterBooking({
   notifications: notificationRepository,
 });
 const editBooking = makeEditBooking({ bookings: bookingRepository, courts: courtRepository });
-const cancelBooking = makeCancelBooking({ bookings: bookingRepository });
+const cancelBooking = makeCancelBooking({ bookings: bookingRepository, payments: paymentRepository });
 const searchBookings = makeSearchBookings({ bookings: bookingRepository });
 const registerBookingSeries = makeRegisterBookingSeries({
   bookings: bookingRepository,
@@ -42,7 +43,7 @@ bookingsRouter.post("/", async (req, res, next) => {
   }
 });
 
-bookingsRouter.post("/serie", async (req, res, next) => {
+bookingsRouter.post("/series", async (req, res, next) => {
   try {
     const bookings = await registerBookingSeries({ ...req.body, actorUserId: req.user!.userId });
     res.status(201).json(bookings);
@@ -60,7 +61,7 @@ bookingsRouter.patch("/:id", async (req, res, next) => {
   }
 });
 
-bookingsRouter.post("/:id/cancelar", async (req, res, next) => {
+bookingsRouter.post("/:id/cancel", async (req, res, next) => {
   try {
     const booking = await cancelBooking(Number(req.params.id));
     res.status(200).json(booking);

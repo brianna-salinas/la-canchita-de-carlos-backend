@@ -82,7 +82,7 @@ courtsRouter.get("/", async (_req, res, next) => {
   }
 });
 
-courtsRouter.patch("/:id/precio", async (req, res, next) => {
+courtsRouter.patch("/:id/price", async (req, res, next) => {
   try {
     const court = await updateCourtPrice(Number(req.params.id), req.body.pricePerHour);
     res.status(200).json(await withSignedPhotoUrl(storage, court));
@@ -91,16 +91,16 @@ courtsRouter.patch("/:id/precio", async (req, res, next) => {
   }
 });
 
-courtsRouter.get("/disponibilidad", async (req, res, next) => {
+courtsRouter.get("/availability", async (req, res, next) => {
   try {
-    const courts = await getConsolidatedAvailability(String(req.query.fecha));
+    const courts = await getConsolidatedAvailability(String(req.query.date));
     res.status(200).json(await withSignedPhotoUrls(storage, courts));
   } catch (err) {
     next(err);
   }
 });
 
-courtsRouter.post("/:id/bloqueos", async (req, res, next) => {
+courtsRouter.post("/:id/blocks", async (req, res, next) => {
   try {
     const blocks = await blockSchedule({ ...req.body, courtId: Number(req.params.id) });
     res.status(201).json(blocks);
@@ -109,7 +109,7 @@ courtsRouter.post("/:id/bloqueos", async (req, res, next) => {
   }
 });
 
-courtsRouter.post("/:id/bloqueos/serie", async (req, res, next) => {
+courtsRouter.post("/:id/blocks/series", async (req, res, next) => {
   try {
     const blocks = await blockScheduleSeries({ ...req.body, courtId: Number(req.params.id), actorUserId: req.user!.userId });
     res.status(201).json(blocks);
@@ -118,7 +118,7 @@ courtsRouter.post("/:id/bloqueos/serie", async (req, res, next) => {
   }
 });
 
-courtsRouter.get("/:id/bloqueos/proximos", async (req, res, next) => {
+courtsRouter.get("/:id/blocks/upcoming", async (req, res, next) => {
   try {
     const blocks = await listUpcomingScheduleBlocks(Number(req.params.id));
     res.status(200).json(blocks);
@@ -127,16 +127,16 @@ courtsRouter.get("/:id/bloqueos/proximos", async (req, res, next) => {
   }
 });
 
-courtsRouter.get("/:id/bloqueos", async (req, res, next) => {
+courtsRouter.get("/:id/blocks", async (req, res, next) => {
   try {
-    const blocks = await listScheduleBlocks(Number(req.params.id), String(req.query.fecha));
+    const blocks = await listScheduleBlocks(Number(req.params.id), String(req.query.date));
     res.status(200).json(blocks);
   } catch (err) {
     next(err);
   }
 });
 
-courtsRouter.delete("/bloqueos/:blockId", async (req, res, next) => {
+courtsRouter.delete("/blocks/:blockId", async (req, res, next) => {
   try {
     await unblockSchedule(Number(req.params.blockId));
     res.status(204).send();
@@ -145,7 +145,7 @@ courtsRouter.delete("/bloqueos/:blockId", async (req, res, next) => {
   }
 });
 
-courtsRouter.post("/:id/fotos", upload.single("foto"), async (req, res, next) => {
+courtsRouter.post("/:id/photos", upload.single("photo"), async (req, res, next) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: "No se envio ninguna imagen." });

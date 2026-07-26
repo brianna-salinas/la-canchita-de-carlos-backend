@@ -23,6 +23,7 @@ package "domain.model" {
     +amount: number
     +method: PaymentMethod
     +createdAt: Date
+    +reversedAt: Date?
   }
 
   class PayableBooking {
@@ -34,6 +35,7 @@ package "domain.model" {
   class "Payment (funciones de dominio)" as PaymentRules << (F,orchid) functions >> {
     +assertAmountWithinTotal(booking, amountToAdd): void
     +resolveStatus(booking, newPaidAmount): PaymentStatus
+    +isReversed(payment): boolean
   }
 
   Payment "*" --> "1" PayableBooking : bookingId
@@ -47,6 +49,7 @@ package "domain.ports" {
     +listPaymentsForBooking(bookingId): Promise<Payment[]>
     +attachReceipt(bookingId, receiptPath): Promise<PayableBooking>
     +getReceiptPath(bookingId): Promise<string?>
+    +reverseAllForBooking(bookingId): Promise<{booking, reversedCount}>
   }
 
   PaymentRepository ..> Payment

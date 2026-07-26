@@ -11,7 +11,7 @@ import { HttpError } from "../../../platform/errors/HttpError.js";
 export interface RegisterBookingInput {
   courtId: number;
   customerId?: number;
-  clienteNuevo?: { name: string; phone: string; documentNumber?: string };
+  newCustomer?: { name: string; phone: string; documentNumber?: string };
   customerName: string;
   customerEmail?: string;
   type?: string;
@@ -61,8 +61,8 @@ export function makeRegisterBooking(deps: {
 
       let customerId = input.customerId;
 
-      if (!customerId && input.clienteNuevo) {
-        const customer = await tx.createEmbeddedCustomer(input.clienteNuevo);
+      if (!customerId && input.newCustomer) {
+        const customer = await tx.createEmbeddedCustomer(input.newCustomer);
         customerId = customer.id;
       }
 

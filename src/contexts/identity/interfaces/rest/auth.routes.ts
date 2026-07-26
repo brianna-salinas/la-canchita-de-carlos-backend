@@ -28,7 +28,7 @@ const resetPassword = makeResetPassword({
 
 export const authRouter = Router();
 
-authRouter.post("/bootstrap-dueno", async (req, res, next) => {
+authRouter.post("/bootstrap-owner", async (req, res, next) => {
   try {
     const owner = await bootstrapOwner(req.body);
     res.status(201).json(owner);
@@ -53,7 +53,7 @@ authRouter.post("/login", async (req, res, next) => {
   }
 });
 
-authRouter.post("/olvide-password", async (req, res, next) => {
+authRouter.post("/forgot-password", async (req, res, next) => {
   try {
     const result = await requestPasswordReset(req.body.email);
     res.status(200).json(result);
@@ -62,7 +62,7 @@ authRouter.post("/olvide-password", async (req, res, next) => {
   }
 });
 
-authRouter.post("/restablecer-password", async (req, res, next) => {
+authRouter.post("/reset-password", async (req, res, next) => {
   try {
     const result = await resetPassword(req.body.token, req.body.newPassword);
     res.status(200).json(result);

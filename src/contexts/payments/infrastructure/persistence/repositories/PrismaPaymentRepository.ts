@@ -6,8 +6,22 @@ function toPayableBooking(b: { id: number; totalAmount: unknown; paidAmount: unk
   return { id: b.id, totalAmount: Number(b.totalAmount), paidAmount: Number(b.paidAmount) };
 }
 
-function toPayment(p: { id: number; bookingId: number; amount: unknown; method: string; createdAt: Date }): Payment {
-  return { id: p.id, bookingId: p.bookingId, amount: Number(p.amount), method: p.method as PaymentMethod, createdAt: p.createdAt };
+function toPayment(p: {
+  id: number;
+  bookingId: number;
+  amount: unknown;
+  method: string;
+  createdAt: Date;
+  reversedAt: Date | null;
+}): Payment {
+  return {
+    id: p.id,
+    bookingId: p.bookingId,
+    amount: Number(p.amount),
+    method: p.method as PaymentMethod,
+    createdAt: p.createdAt,
+    reversedAt: p.reversedAt,
+  };
 }
 
 export class PrismaPaymentRepository implements PaymentRepository {
@@ -43,6 +57,20 @@ export class PrismaPaymentRepository implements PaymentRepository {
   async getReceiptPath(bookingId: number): Promise<string | null> {
     const booking = await prisma.booking.findUniqueOrThrow({ where: { id: bookingId }, select: { receiptUrl: true } });
     return booking.receiptUrl;
+  }
+
+  async reverseAllForBooking(bookingId: number): Promise<{ booking: PayableBooking; reversedCount: number }> {
+    const [{ count }, booking] = await prisma.$transaction([
+      prisma.payment.updateMany({
+        where: { bookingId, reversedAt: null },
+        data: { reversedAt: new Date() },
+      }),
+      prisma.booking.update({
+        where: { id: bookingId },
+        data: { paidAmount: 0, paymentStatus: "PENDING" },
+      }),
+    ]);
+    return { booking: toPayableBooking(booking), reversedCount: count };
   }
 }
 
